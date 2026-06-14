@@ -621,6 +621,7 @@ a:hover {
   word-break: break-word;
   hyphens: auto;
   min-width: 0;
+  padding-right: 20px;
   text-align: right;
   cursor: pointer;
   text-decoration: none;
