@@ -156,17 +156,31 @@ a:hover {
 }
 
 .badge-btn.badge-black {
-  background: var(--badge-black-bg);
-  border-color: var(--badge-black-bg);
-  color: var(--on-accent);
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
 }
 
 .badge-btn.badge-black:hover,
 .badge-btn.badge-black.active {
-  background: var(--badge-black-hover);
-  border-color: var(--badge-black-hover);
-  color: var(--on-accent);
+  background: #1e293b;
+  border-color: #1e293b;
+  color: #ffffff;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+}
+
+[data-theme="dark"] .badge-btn.badge-black {
+  background: #334155;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .badge-btn.badge-black:hover,
+[data-theme="dark"] .badge-btn.badge-black.active {
+  background: #475569;
+  border-color: #64748b;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
 .badge-btn:active {
