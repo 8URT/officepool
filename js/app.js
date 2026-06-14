@@ -722,11 +722,18 @@ function setStatus({ live, text, updatedAt }) {
   els.liveDot.classList.toggle("live", Boolean(live));
 }
 
-async function fetchJson(url) {
+async function fetchJson(url, { timeoutMs = 15000 } = {}) {
   const bustUrl = `${url}${url.includes("?") ? "&" : "?"}_=${Date.now()}`;
-  const response = await fetch(bustUrl, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Failed to fetch ${url}`);
-  return response.json();
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(bustUrl, { cache: "no-store", signal: controller.signal });
+    if (!response.ok) throw new Error(`Failed to fetch ${url}`);
+    return await response.json();
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 }
 
 function formatLatestResult(match) {
@@ -735,9 +742,13 @@ function formatLatestResult(match) {
 }
 
 function setPullLoading(loading) {
-  els.pullResultsBtn?.classList.toggle("spinning", loading);
-  els.pullResultsBtn?.disabled = loading;
-  els.refreshBtn?.classList.toggle("spinning", loading);
+  if (els.pullResultsBtn) {
+    els.pullResultsBtn.classList.toggle("spinning", loading);
+    els.pullResultsBtn.disabled = loading;
+  }
+  if (els.refreshBtn) {
+    els.refreshBtn.classList.toggle("spinning", loading);
+  }
 }
 
 async function refresh({ manual = false } = {}) {
@@ -802,9 +813,11 @@ async function refresh({ manual = false } = {}) {
 
     const leaders = standings.filter((entry) => entry.rank === 1);
     const leaderLabel =
-      leaders.length > 1
-        ? `${leaders.length} tied (${leaders[0].points} pts)`
-        : `${formatDisplayName(leaders[0].name)} (${leaders[0].points} pts)`;
+      leaders.length === 0
+        ? "—"
+        : leaders.length > 1
+          ? `${leaders.length} tied (${leaders[0].points} pts)`
+          : `${formatDisplayName(leaders[0].name)} (${leaders[0].points} pts)`;
 
     const storedLabel = storedScoresMeta?.updatedAt
       ? ` · stored ${formatTime(new Date(storedScoresMeta.updatedAt))}`
