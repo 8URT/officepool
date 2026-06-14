@@ -56,8 +56,6 @@ def main() -> None:
                 "date": serialize(dashboard.cell(row, 3).value),
                 "time": serialize(dashboard.cell(row, 4).value),
                 "home": dashboard.cell(row, 5).value,
-                "scoreHome": dashboard.cell(row, 6).value,
-                "scoreAway": dashboard.cell(row, 7).value,
                 "away": dashboard.cell(row, 8).value,
             }
         )

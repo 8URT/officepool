@@ -1,96 +1,82 @@
 # Office World Cup 2026 Pool — Live Ranking
 
-Mobile-first live leaderboard for your office football pool. Predictions come from the Excel sheet; match results auto-sync from the free [openfootball](https://github.com/openfootball/worldcup.json) dataset (no API key).
+Mobile-first live leaderboard for your office football pool. Predictions are exported locally from Excel; match results are stored in `data/scores.json` and synced from [openfootball](https://github.com/openfootball/worldcup.json).
 
-**Live site:** enable GitHub Pages (see [Deploy](#deploy)) → `https://8urt.github.io/officepool/`
+**Live site:** https://8urt.github.io/officepool/
 
 ## What you get
 
 - **Virtual ranking** — sorted by exact-score hits (1 point each), with tied ranks
 - **Movement arrows** — last 5 results with ▲ / ▼ / dot per match
-- **Auto refresh** — polls openfootball every 2 minutes
+- **Score memory** — `data/scores.json` keeps all finished results (synced every 30 min)
+- **Live + stored** — site merges stored scores with live API on each refresh
 - **Player sheets** — tap a name to see predictions vs actual scores
-- **Calendar & Results** — upcoming fixtures and finished matches
 - **Dark mode** — default dark theme, toggle saved in browser
 
 ## Scoring
 
 Each participant gets **1 point per exact score** prediction. Correct winner alone does not count.
 
-## Local development
+## Local setup (predictions)
 
-1. **Export predictions** after updating the Excel file:
+The Excel file stays **on your machine only** — it is not in the repo.
+
+1. Place `World Cup 2026.xlsx` in the project folder.
+2. Export predictions:
 
 ```bash
 pip3 install openpyxl
 python3 scripts/export-pool-data.py
 ```
 
-2. **Run a local server** (required for JSON loading):
+3. Commit and push `data/pool.json` when predictions change.
+
+4. Run locally:
 
 ```bash
 python3 -m http.server 8080
 ```
 
-3. Open **http://localhost:8080**
+## Scores memory (API results)
 
-## Updating during the tournament
+Finished match scores are saved to **`data/scores.json`**. This is the site's shared memory — rankings still work if the live API is temporarily down.
 
-1. Update `World Cup 2026.xlsx` with new predictions.
-2. Re-run `python3 scripts/export-pool-data.py`.
-3. Commit and push `data/pool.json` — the live site picks it up on the next refresh (within 2 min).
+**Sync manually:**
 
-Live match scores sync automatically from openfootball; re-export only when **predictions** change.
+```bash
+python3 scripts/sync-scores.py
+git add data/scores.json
+git commit -m "Sync scores"
+git push
+```
+
+**Automatic sync:** GitHub Actions runs every 30 minutes (`.github/workflows/sync-scores.yml`) and commits new results when they appear.
 
 ## Deploy
 
-### GitHub Pages (recommended)
+### GitHub Pages
 
-The repo includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that deploys on every push to `main`.
+1. **Settings → Pages → Source:** GitHub Actions
+2. Push to `main` — deploy workflow syncs scores and publishes the site
 
-**One-time setup:**
+Published files: `index.html`, `css/`, `js/`, `data/pool.json`, `data/scores.json`, `favicon.svg`
 
-1. Open **Settings → Pages** on [github.com/8URT/officepool](https://github.com/8URT/officepool)
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**
-3. Push to `main` — the workflow builds and publishes the site
-
-Your URL will be: **https://8urt.github.io/officepool/**
-
-Only the static web files are published (`index.html`, `css/`, `js/`, `data/`, `favicon.svg`). The Excel file and export script stay in the repo but are not served publicly.
-
-### Netlify / Cloudflare Pages
-
-Use the included `netlify.toml` or point your host at the repo root with:
-
-```bash
-bash scripts/prepare-site.sh _site
-```
-
-Publish the `_site` folder, or set the build command to that script.
-
-### Manual upload
-
-Upload these files to any static host:
-
-- `index.html`, `favicon.svg`
-- `css/styles.css`
-- `js/app.js`
-- `data/pool.json`
+The Excel file and export scripts are **not** deployed.
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `World Cup 2026.xlsx` | Source pool spreadsheet (not deployed) |
-| `scripts/export-pool-data.py` | Excel → `data/pool.json` |
-| `scripts/prepare-site.sh` | Build folder for static hosting |
-| `data/pool.json` | Participants, matches, predictions |
-| `index.html` | Main page |
-| `js/app.js` | Ranking logic + live score sync |
-| `.github/workflows/deploy.yml` | GitHub Pages deployment |
+| `World Cup 2026.xlsx` | Local only — source spreadsheet (gitignored) |
+| `scripts/export-pool-data.py` | Excel → `data/pool.json` (predictions + fixtures) |
+| `scripts/sync-scores.py` | openfootball → `data/scores.json` (results memory) |
+| `data/pool.json` | Participants, fixtures, predictions |
+| `data/scores.json` | Stored match results (site memory) |
+| `.github/workflows/sync-scores.yml` | Auto-sync scores every 30 min |
+| `.github/workflows/deploy.yml` | Deploy to GitHub Pages |
 
 ## Live scores source
 
 `https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json`
 
-Community-maintained; updates after matches finish. Falls back to scores in the Excel dashboard sheet if the feed is unavailable.
+The site loads stored scores first, then merges live API data on top. Stored scores are never removed — only updated or added.

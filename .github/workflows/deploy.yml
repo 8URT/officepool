@@ -24,11 +24,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Sync latest scores
+        run: python3 scripts/sync-scores.py
+
       - name: Prepare static site
-        run: |
-          mkdir _site
-          cp index.html favicon.svg .nojekyll _site/
-          cp -r css js data _site/
+        run: bash scripts/prepare-site.sh _site
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

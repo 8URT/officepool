@@ -1,4 +1,5 @@
 const POOL_URL = "data/pool.json";
+const STORED_SCORES_URL = "data/scores.json";
 const SCORES_URL =
   "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json";
 const REFRESH_MS = 2 * 60 * 1000;
@@ -46,6 +47,7 @@ const els = {
 };
 
 let poolData = null;
+let storedScoresMeta = null;
 let refreshTimer = null;
 let appState = {
   standings: [],
@@ -202,6 +204,33 @@ function renderRankEvolution({ baselineRank, arrows }) {
   `;
 }
 
+function buildScoreMapFromStored(storedData) {
+  const map = new Map();
+  for (const match of storedData?.matches || []) {
+    if (match.scoreHome == null || match.scoreAway == null) continue;
+    const key = match.key || normalizeKey(match.home, match.away);
+    map.set(key, {
+      home: match.home,
+      away: match.away,
+      scoreHome: match.scoreHome,
+      scoreAway: match.scoreAway,
+      status: match.status || "finished",
+      isLive: false,
+      date: match.date,
+      round: match.round,
+      group: match.group,
+      source: "stored",
+    });
+  }
+  return map;
+}
+
+function mergeScoreMaps(baseMap, overlayMap) {
+  const merged = new Map(baseMap);
+  for (const [key, value] of overlayMap) merged.set(key, value);
+  return merged;
+}
+
 function buildScoreMapFromOpenfootball(apiMatches) {
   const map = new Map();
   for (const match of apiMatches) {
@@ -229,23 +258,7 @@ function buildScoreMapFromOpenfootball(apiMatches) {
 
 function resolveMatchResult(poolMatch, scoreMap) {
   const key = normalizeKey(poolMatch.home, poolMatch.away);
-  const fromApi = scoreMap.get(key);
-  if (fromApi) return fromApi;
-
-  if (poolMatch.scoreHome != null && poolMatch.scoreAway != null) {
-    return {
-      home: poolMatch.home,
-      away: poolMatch.away,
-      scoreHome: poolMatch.scoreHome,
-      scoreAway: poolMatch.scoreAway,
-      date: poolMatch.date,
-      round: "Group Stage",
-      group: null,
-      source: "sheet",
-    };
-  }
-
-  return null;
+  return scoreMap.get(key) || null;
 }
 
 function getPrediction(predictions, matchId) {
@@ -629,11 +642,21 @@ async function refresh({ manual = false } = {}) {
     poolData = await fetchJson(POOL_URL);
 
     let scoreMap = new Map();
-    let liveSource = "sheet";
+    let liveSource = "none";
+
+    try {
+      const storedData = await fetchJson(STORED_SCORES_URL);
+      storedScoresMeta = storedData;
+      scoreMap = buildScoreMapFromStored(storedData);
+      if (scoreMap.size) liveSource = "stored";
+    } catch (error) {
+      console.warn("Stored scores unavailable.", error);
+      storedScoresMeta = null;
+    }
 
     try {
       const liveData = await fetchJson(SCORES_URL);
-      scoreMap = buildScoreMapFromOpenfootball(liveData.matches || []);
+      scoreMap = mergeScoreMaps(scoreMap, buildScoreMapFromOpenfootball(liveData.matches || []));
       liveSource = "openfootball";
     } catch (error) {
       console.warn("openfootball scores unavailable.", error);
@@ -663,12 +686,21 @@ async function refresh({ manual = false } = {}) {
       leaders.length > 1
         ? `${leaders.length} tied (${leaders[0].points} pts)`
         : `${leaders[0].name} (${leaders[0].points} pts)`;
+
+    const storedLabel = storedScoresMeta?.updatedAt
+      ? ` · stored ${formatTime(new Date(storedScoresMeta.updatedAt))}`
+      : storedScoresMeta?.matchCount
+        ? ` · ${storedScoresMeta.matchCount} stored`
+        : "";
+
     setStatus({
       live: liveSource === "openfootball",
       text:
         liveSource === "openfootball"
-          ? `${finishedMatches.length} results · openfootball · Leader: ${leaderLabel}`
-          : `Offline mode · ${finishedMatches.length} results from sheet`,
+          ? `${finishedMatches.length} results · live · Leader: ${leaderLabel}${storedLabel}`
+          : liveSource === "stored"
+            ? `${finishedMatches.length} results · stored memory · Leader: ${leaderLabel}`
+            : `Waiting for results · Leader: ${leaderLabel}`,
       updatedAt: new Date(),
     });
 
