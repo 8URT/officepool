@@ -474,15 +474,6 @@ function renderPlayerSheetContent(name) {
     .join("");
 }
 
-function renderUpcomingPillRow(match) {
-  return `
-    <article class="pill-match-row">
-      <span class="pill-match-date">${formatMatchWhen(match)}</span>
-      <div class="pill-match-teams">${match.home} vs ${match.away}</div>
-    </article>
-  `;
-}
-
 function renderResultPillRow(match) {
   const result = match.result;
   const score = result ? `${result.scoreHome} - ${result.scoreAway}` : "—";
