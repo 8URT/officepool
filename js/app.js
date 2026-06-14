@@ -626,9 +626,7 @@ async function refresh({ manual = false } = {}) {
   els.refreshBtn.classList.add("spinning");
 
   try {
-    if (!poolData) {
-      poolData = await fetchJson(POOL_URL);
-    }
+    poolData = await fetchJson(POOL_URL);
 
     let scoreMap = new Map();
     let liveSource = "sheet";
