@@ -639,7 +639,9 @@ async function refresh({ manual = false } = {}) {
   els.refreshBtn.classList.add("spinning");
 
   try {
-    poolData = await fetchJson(POOL_URL);
+    if (!poolData) {
+      poolData = await fetchJson(POOL_URL);
+    }
 
     let scoreMap = new Map();
     let liveSource = "none";

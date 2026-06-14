@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export World Cup pool predictions from Excel to pool.json."""
+"""One-time export: build pool.json from the office Excel file (predictions are fixed)."""
 
 from __future__ import annotations
 
