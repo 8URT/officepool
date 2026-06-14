@@ -293,12 +293,13 @@ function buildRankEvolution(pool, finishedMatches) {
   return evolution;
 }
 
-function renderRankEvolution({ baselineRank, arrows }) {
-  const baselineHtml =
-    baselineRank != null
-      ? `<span class="rank-baseline" title="Rank before last ${ARROW_MATCH_LOOKBACK} results">#${baselineRank}</span>`
-      : `<span class="rank-baseline muted">—</span>`;
+function renderRankBaseline(baselineRank) {
+  return baselineRank != null
+    ? `<span class="rank-baseline" title="Rank before last ${ARROW_MATCH_LOOKBACK} results">#${baselineRank}</span>`
+    : `<span class="rank-baseline muted">—</span>`;
+}
 
+function renderRankArrows(arrows) {
   const arrowsHtml = arrows
     .map((step, index) => {
       if (step.type === "pending") {
@@ -321,7 +322,6 @@ function renderRankEvolution({ baselineRank, arrows }) {
 
   return `
     <div class="rank-evolution">
-      ${baselineHtml}
       <div class="rank-arrows" aria-label="Last ${ARROW_MATCH_LOOKBACK} match movements">${arrowsHtml}</div>
     </div>
   `;
@@ -646,8 +646,11 @@ function renderRanking(standings, rankEvolution) {
 
       return `
         <li class="rank-row${topClass}">
-          <span class="rank-pos">${rank}</span>
-          ${renderRankEvolution(evolution)}
+          <div class="rank-pos-wrap">
+            <span class="rank-pos">${rank}</span>
+            ${renderRankBaseline(evolution.baselineRank)}
+          </div>
+          ${renderRankArrows(evolution.arrows)}
           <button type="button" class="rank-name-btn" data-player="${entry.name}">${formatDisplayName(entry.name)}</button>
           <div class="rank-meta">
             <div class="rank-points">${entry.points}</div>
