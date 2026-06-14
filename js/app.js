@@ -156,6 +156,49 @@ function formatMatchWhen(match, { includeMut = true } = {}) {
   return `${datePart} · ${timePart}${suffix}`;
 }
 
+function formatMutDateOnly(match) {
+  const when = getMatchWhen(match);
+  if (!when) return match.date || "";
+  return mutDateFormatter.format(when);
+}
+
+function formatMutTimeOnly(match) {
+  const when = getMatchWhen(match);
+  if (!when) return match.time || "";
+  return match.time || mutTimeFormatter.format(when);
+}
+
+function renderCalendarRow(match) {
+  return `
+    <article class="calendar-row">
+      <span class="calendar-time">${formatMutTimeOnly(match)}</span>
+      <div class="calendar-teams">${match.home} <span class="calendar-vs">vs</span> ${match.away}</div>
+    </article>
+  `;
+}
+
+function renderCalendarGrouped(matches) {
+  const groups = new Map();
+  for (const match of matches) {
+    const day = formatMutDateOnly(match);
+    if (!groups.has(day)) groups.set(day, []);
+    groups.get(day).push(match);
+  }
+
+  return [...groups.entries()]
+    .map(
+      ([day, dayMatches]) => `
+        <section class="calendar-day">
+          <h3 class="calendar-day-head">${day}</h3>
+          <div class="calendar-day-list">
+            ${dayMatches.map(renderCalendarRow).join("")}
+          </div>
+        </section>
+      `
+    )
+    .join("");
+}
+
 function showToast(message) {
   els.toast.textContent = message;
   els.toast.classList.add("show");
@@ -463,9 +506,9 @@ function openInfoSheet(type) {
 
   if (type === "calendar") {
     els.infoSheetTitle.textContent = "Calendar";
-    els.infoSheetSub.textContent = `Next ${CALENDAR_PILL_COUNT} upcoming matches`;
+    els.infoSheetSub.textContent = `Next ${CALENDAR_PILL_COUNT} upcoming matches · MUT`;
     els.infoSheetBody.innerHTML = upcoming.length
-      ? `<div class="pill-match-list">${upcoming.map(renderUpcomingPillRow).join("")}</div>`
+      ? `<div class="calendar-list">${renderCalendarGrouped(upcoming)}</div>`
       : `<div class="empty-state">No upcoming matches in the schedule.</div>`;
   } else {
     els.infoSheetTitle.textContent = "Results";
