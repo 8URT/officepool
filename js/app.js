@@ -422,7 +422,7 @@ function renderPredictionRow(match, prediction, { mode = "pending" } = {}) {
       <div class="pred-teams">${match.home} vs ${match.away}</div>
       <div class="pred-scores" style="grid-template-columns: ${mode === "pending" ? "1fr" : "1fr 1fr"}">
         <div class="pred-score-box">
-          <div class="pred-score-label">Prediction</div>
+          <div class="pred-score-label">Predicted</div>
           <div class="pred-score-value">${formatScore(prediction?.home, prediction?.away)}</div>
         </div>
         ${actualBlock}
@@ -451,7 +451,7 @@ function renderPlayerSheetContent(name) {
   els.playerSheetStats.innerHTML = `
     <div class="player-stat">
       <div class="player-stat-value">${standing?.points ?? 0}</div>
-      <div class="player-stat-label">Virtual pts</div>
+      <div class="player-stat-label">Virtual points</div>
     </div>
     <div class="player-stat">
       <div class="player-stat-value">${standing?.exactHits ?? 0}</div>
