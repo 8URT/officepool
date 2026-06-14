@@ -6,6 +6,43 @@ const REFRESH_MS = 2 * 60 * 1000;
 const ARROW_MATCH_LOOKBACK = 5;
 const CALENDAR_PILL_COUNT = 10;
 const THEME_KEY = "wc-pool-theme";
+const MUT = "Indian/Mauritius";
+
+const MONTHS = {
+  Jan: 0,
+  Feb: 1,
+  Mar: 2,
+  Apr: 3,
+  May: 4,
+  Jun: 5,
+  Jul: 6,
+  Aug: 7,
+  Sep: 8,
+  Oct: 9,
+  Nov: 10,
+  Dec: 11,
+};
+
+const mutDateFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: MUT,
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+});
+
+const mutTimeFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: MUT,
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+
+const mutClockFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: MUT,
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
 
 const TEAM_ALIASES = {
   "Korea Republic": "South Korea",
@@ -70,19 +107,53 @@ function normalizeKey(home, away) {
   return `${teams[0]}|${teams[1]}`;
 }
 
-function parsePoolDate(dateStr) {
+function parseTimeParts(timeStr) {
+  if (!timeStr) return [0, 0];
+  const [hours, minutes] = String(timeStr).split(":");
+  return [parseInt(hours, 10) || 0, parseInt(minutes, 10) || 0];
+}
+
+function mutToDate(year, monthIndex, day, hour, minute) {
+  return new Date(Date.UTC(year, monthIndex, day, hour - 4, minute));
+}
+
+function parseMatchDateTime(dateStr, timeStr) {
   if (!dateStr) return null;
-  const cleaned = String(dateStr).replace(",", "");
-  const parsed = new Date(cleaned);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [year, month, day] = dateStr.split("-").map((part) => parseInt(part, 10));
+    const [hour, minute] = parseTimeParts(timeStr);
+    return mutToDate(year, month - 1, day, hour, minute);
+  }
+
+  const cleaned = String(dateStr).replace(",", "").trim();
+  const parts = cleaned.match(/^([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})$/);
+  if (!parts) return null;
+
+  const monthIndex = MONTHS[parts[1].slice(0, 3)];
+  if (monthIndex == null) return null;
+
+  const [hour, minute] = parseTimeParts(timeStr);
+  return mutToDate(parseInt(parts[3], 10), monthIndex, parseInt(parts[2], 10), hour, minute);
+}
+
+function getMatchWhen(match) {
+  if (match.when instanceof Date && !Number.isNaN(match.when.getTime())) return match.when;
+  return parseMatchDateTime(match.date, match.time);
 }
 
 function formatTime(isoDate) {
   if (!isoDate) return "";
-  return new Intl.DateTimeFormat(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(isoDate);
+  return `${mutClockFormatter.format(isoDate)} MUT`;
+}
+
+function formatMatchWhen(match, { includeMut = true } = {}) {
+  const when = getMatchWhen(match);
+  if (!when) return match.date || "";
+  const datePart = mutDateFormatter.format(when);
+  const timePart = match.time || mutTimeFormatter.format(when);
+  const suffix = includeMut ? " MUT" : "";
+  return `${datePart} · ${timePart}${suffix}`;
 }
 
 function showToast(message) {
@@ -271,17 +342,6 @@ function formatScore(home, away) {
   return `${home} - ${away}`;
 }
 
-function formatMatchDate(match) {
-  if (match.when) {
-    return new Intl.DateTimeFormat(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    }).format(match.when);
-  }
-  return match.date || "";
-}
-
 function renderPredictionRow(match, prediction, { mode = "pending" } = {}) {
   const result = match.result;
   const exact = mode !== "pending" && isExactPrediction(prediction, result);
@@ -311,7 +371,7 @@ function renderPredictionRow(match, prediction, { mode = "pending" } = {}) {
   return `
     <article class="pred-row ${statusClass}${mode === "live" ? " live" : ""}">
       <div class="pred-top">
-        <span>${formatMatchDate(match)}${match.time ? ` · ${match.time}` : ""}${mode === "live" && result.statusText ? ` · ${result.statusText}` : ""}</span>
+        <span>${formatMatchWhen(match)}${mode === "live" && result.statusText ? ` · ${result.statusText}` : ""}</span>
         ${badge}
       </div>
       <div class="pred-teams">${match.home} vs ${match.away}</div>
@@ -369,17 +429,6 @@ function renderPlayerSheetContent(name) {
       return renderPredictionRow(match, getPrediction(predictions, match.id), { mode });
     })
     .join("");
-}
-
-function formatMatchWhen(match) {
-  const when = match.when
-    ? new Intl.DateTimeFormat(undefined, {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      }).format(match.when)
-    : match.date || "";
-  return `${when}${match.time ? ` · ${match.time}` : ""}`;
 }
 
 function renderUpcomingPillRow(match) {
@@ -496,7 +545,7 @@ function computeStandings(pool, scoreMap) {
 
   for (const match of pool.matches) {
     const result = resolveMatchResult(match, scoreMap);
-    const when = parsePoolDate(match.date);
+    const when = getMatchWhen(match);
     const entry = { ...match, result, when };
 
     if (result) {
@@ -571,9 +620,7 @@ function renderMatchCard(match, pool, { variant = "finished" } = {}) {
   const result = match.result;
   const winners =
     variant === "finished" || variant === "live" ? winnersForMatch(pool, match) : [];
-  const when = match.when
-    ? new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric" }).format(match.when)
-    : match.date;
+  const whenLabel = formatMatchWhen(match);
 
   const scoreText = result ? `${result.scoreHome} - ${result.scoreAway}` : "vs";
   const cardClass =
@@ -593,7 +640,7 @@ function renderMatchCard(match, pool, { variant = "finished" } = {}) {
   return `
     <article class="match-card ${cardClass}">
       <div class="match-meta">
-        <span>${when}${match.time ? ` · ${match.time}` : ""}${variant === "live" && result.statusText ? ` · ${result.statusText}` : ""}</span>
+        <span>${whenLabel}${variant === "live" && result.statusText ? ` · ${result.statusText}` : ""}</span>
         <span>${variant === "live" ? "Live" : result?.group || "Group stage"}</span>
       </div>
       <div class="match-teams">
