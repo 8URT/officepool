@@ -61,9 +61,12 @@
       <h1>Office <span class="accent">pool</span></h1>
       <p class="hero-sub">Virtual ranking · kickoffs shown in MUT (UTC+4) · refreshes every 2 min</p>
       <div class="status-bar">
-        <span class="live-dot" id="liveDot"></span>
-        <span id="statusText">Loading…</span>
-        <span class="status-time" id="lastUpdate"></span>
+        <div class="status-bar-main">
+          <span class="live-dot" id="liveDot"></span>
+          <span class="status-text" id="statusText">Loading…</span>
+          <span class="status-time" id="lastUpdate"></span>
+        </div>
+        <button type="button" class="pull-results-btn" id="pullResultsBtn">Pull latest results</button>
       </div>
     </header>
 

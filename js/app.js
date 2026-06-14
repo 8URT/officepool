@@ -65,6 +65,7 @@ const els = {
   liveDot: document.getElementById("liveDot"),
   playedChip: document.getElementById("playedChip"),
   refreshBtn: document.getElementById("refreshBtn"),
+  pullResultsBtn: document.getElementById("pullResultsBtn"),
   themeBtn: document.getElementById("themeBtn"),
   toast: document.getElementById("toast"),
   playerSheet: document.getElementById("playerSheet"),
@@ -722,13 +723,29 @@ function setStatus({ live, text, updatedAt }) {
 }
 
 async function fetchJson(url) {
-  const response = await fetch(url, { cache: "no-store" });
+  const bustUrl = `${url}${url.includes("?") ? "&" : "?"}_=${Date.now()}`;
+  const response = await fetch(bustUrl, { cache: "no-store" });
   if (!response.ok) throw new Error(`Failed to fetch ${url}`);
   return response.json();
 }
 
+function formatLatestResult(match) {
+  if (!match?.result) return "";
+  return `${match.home} ${match.result.scoreHome}–${match.result.scoreAway} ${match.away}`;
+}
+
+function setPullLoading(loading) {
+  els.pullResultsBtn?.classList.toggle("spinning", loading);
+  els.pullResultsBtn?.disabled = loading;
+  els.refreshBtn?.classList.toggle("spinning", loading);
+}
+
 async function refresh({ manual = false } = {}) {
-  els.refreshBtn.classList.add("spinning");
+  const prevFinishedCount = appState.finishedMatches?.length ?? 0;
+  const prevFinishedKeys = new Set(
+    (appState.finishedMatches || []).map((match) => normalizeKey(match.home, match.away))
+  );
+  setPullLoading(true);
 
   try {
     if (!poolData) {
@@ -737,27 +754,35 @@ async function refresh({ manual = false } = {}) {
 
     let scoreMap = new Map();
     let liveSource = "none";
+    let liveFetchFailed = false;
+    let storedFetchFailed = false;
+
+    try {
+      const liveData = await fetchJson(SCORES_URL);
+      scoreMap = buildScoreMapFromOpenfootball(liveData.matches || []);
+      if (scoreMap.size) liveSource = "openfootball";
+    } catch (error) {
+      liveFetchFailed = true;
+      console.warn("openfootball scores unavailable.", error);
+    }
 
     try {
       const storedData = await fetchJson(STORED_SCORES_URL);
       storedScoresMeta = storedData;
-      scoreMap = buildScoreMapFromStored(storedData);
-      if (scoreMap.size) liveSource = "stored";
+      scoreMap = mergeScoreMaps(buildScoreMapFromStored(storedData), scoreMap);
+      if (liveSource !== "openfootball" && scoreMap.size) liveSource = "stored";
     } catch (error) {
+      storedFetchFailed = true;
       console.warn("Stored scores unavailable.", error);
-      storedScoresMeta = null;
-    }
-
-    try {
-      const liveData = await fetchJson(SCORES_URL);
-      scoreMap = mergeScoreMaps(scoreMap, buildScoreMapFromOpenfootball(liveData.matches || []));
-      liveSource = "openfootball";
-    } catch (error) {
-      console.warn("openfootball scores unavailable.", error);
+      if (liveSource !== "openfootball") storedScoresMeta = null;
     }
 
     const { standings, rankEvolution, scoredMatches, finishedMatches, liveMatches, upcomingMatches } =
       computeStandings(poolData, scoreMap);
+
+    const newResults = finishedMatches.filter(
+      (match) => !prevFinishedKeys.has(normalizeKey(match.home, match.away))
+    );
 
     appState = {
       standings,
@@ -787,19 +812,37 @@ async function refresh({ manual = false } = {}) {
         ? ` · ${storedScoresMeta.matchCount} stored`
         : "";
 
+    const sourceHint =
+      liveFetchFailed && storedFetchFailed
+        ? " · could not reach score sources"
+        : liveFetchFailed
+          ? " · live API blocked, using stored"
+          : "";
+
     setStatus({
       live: liveSource === "openfootball",
       text:
         liveSource === "openfootball"
           ? `${finishedMatches.length} results · live · Leader: ${leaderLabel}${storedLabel}`
           : liveSource === "stored"
-            ? `${finishedMatches.length} results · stored memory · Leader: ${leaderLabel}`
-            : `Waiting for results · Leader: ${leaderLabel}`,
+            ? `${finishedMatches.length} results · stored memory · Leader: ${leaderLabel}${sourceHint}`
+            : `Waiting for results · Leader: ${leaderLabel}${sourceHint}`,
       updatedAt: new Date(),
     });
 
     if (manual) {
-      showToast("Ranking updated");
+      if (newResults.length > 0) {
+        const latest = newResults[0];
+        showToast(
+          `+${newResults.length} new · latest: ${formatLatestResult(latest)}`
+        );
+      } else if (finishedMatches.length > prevFinishedCount) {
+        showToast(`${finishedMatches.length} results · ranking updated`);
+      } else if (liveFetchFailed && storedFetchFailed) {
+        showToast("Could not pull results — check your connection");
+      } else {
+        showToast(`${finishedMatches.length} results · no new scores yet`);
+      }
     }
 
     scheduleRefresh();
@@ -807,8 +850,9 @@ async function refresh({ manual = false } = {}) {
     console.error(error);
     setStatus({ live: false, text: "Could not load pool data", updatedAt: null });
     els.rankingList.innerHTML = `<li class="empty-state">Failed to load data. Run a local server from this folder.</li>`;
+    if (manual) showToast("Could not load pool data");
   } finally {
-    els.refreshBtn.classList.remove("spinning");
+    setPullLoading(false);
   }
 }
 
@@ -822,6 +866,7 @@ function startAutoRefresh() {
 }
 
 els.refreshBtn.addEventListener("click", () => refresh({ manual: true }));
+els.pullResultsBtn?.addEventListener("click", () => refresh({ manual: true }));
 
 function applyTheme(theme) {
   const metaTheme = document.querySelector('meta[name="theme-color"]');
