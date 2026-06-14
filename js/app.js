@@ -104,6 +104,13 @@ function normalizeTeam(name) {
   return TEAM_ALIASES[name] || name;
 }
 
+function formatDisplayName(name) {
+  if (!name) return "";
+  const lower = String(name).toLocaleLowerCase("en");
+  if (!lower) return "";
+  return lower.charAt(0).toLocaleUpperCase("en") + lower.slice(1);
+}
+
 function normalizeKey(home, away) {
   const teams = [normalizeTeam(home), normalizeTeam(away)].sort();
   return `${teams[0]}|${teams[1]}`;
@@ -440,7 +447,7 @@ function renderPlayerSheetContent(name) {
       ? [...appState.liveMatches, ...appState.finishedMatches]
       : appState.upcomingMatches;
 
-  els.playerSheetTitle.textContent = name;
+  els.playerSheetTitle.textContent = formatDisplayName(name);
   const evolution = appState.rankEvolution[name];
   let sub = rank ? `#${rank} virtual rank` : "Pool participant";
   if (rank && evolution?.baselineRank != null) {
@@ -641,7 +648,7 @@ function renderRanking(standings, rankEvolution) {
         <li class="rank-row${topClass}">
           <span class="rank-pos">${rank}</span>
           ${renderRankEvolution(evolution)}
-          <button type="button" class="rank-name-btn" data-player="${entry.name}">${entry.name}</button>
+          <button type="button" class="rank-name-btn" data-player="${entry.name}">${formatDisplayName(entry.name)}</button>
           <div class="rank-meta">
             <div class="rank-points">${entry.points}</div>
             <div class="rank-hits">${entry.exactHits} exact</div>
@@ -665,10 +672,10 @@ function renderMatchCard(match, pool, { variant = "finished" } = {}) {
   const winnersHtml =
     variant === "live"
       ? winners.length
-        ? `<div class="match-winners">${winners.length} exact right now: ${winners.slice(0, 4).join(", ")}${winners.length > 4 ? ` +${winners.length - 4}` : ""}</div>`
+        ? `<div class="match-winners">${winners.length} exact right now: ${winners.slice(0, 4).map(formatDisplayName).join(", ")}${winners.length > 4 ? ` +${winners.length - 4}` : ""}</div>`
         : `<div class="match-winners none">No one exact at ${scoreText} yet</div>`
       : variant === "finished" && winners.length
-        ? `<div class="match-winners">${winners.length} exact: ${winners.slice(0, 4).join(", ")}${winners.length > 4 ? ` +${winners.length - 4}` : ""}</div>`
+        ? `<div class="match-winners">${winners.length} exact: ${winners.slice(0, 4).map(formatDisplayName).join(", ")}${winners.length > 4 ? ` +${winners.length - 4}` : ""}</div>`
         : variant === "finished"
           ? `<div class="match-winners none">No exact scores this match</div>`
           : "";
@@ -770,7 +777,7 @@ async function refresh({ manual = false } = {}) {
     const leaderLabel =
       leaders.length > 1
         ? `${leaders.length} tied (${leaders[0].points} pts)`
-        : `${leaders[0].name} (${leaders[0].points} pts)`;
+        : `${formatDisplayName(leaders[0].name)} (${leaders[0].points} pts)`;
 
     const storedLabel = storedScoresMeta?.updatedAt
       ? ` · stored ${formatTime(new Date(storedScoresMeta.updatedAt))}`
