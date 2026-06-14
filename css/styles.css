@@ -616,7 +616,7 @@ a:hover {
   word-break: break-word;
   hyphens: auto;
   min-width: 0;
-  text-align: left;
+  text-align: right;
   cursor: pointer;
   text-decoration: none;
   transition: color 0.2s ease;
