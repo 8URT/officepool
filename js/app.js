@@ -651,7 +651,6 @@ function renderRanking(standings, rankEvolution) {
           <button type="button" class="rank-name-btn" data-player="${entry.name}">${formatDisplayName(entry.name)}</button>
           <div class="rank-meta">
             <div class="rank-points">${entry.points}</div>
-            <div class="rank-hits">${entry.exactHits} exact</div>
           </div>
         </li>
       `;

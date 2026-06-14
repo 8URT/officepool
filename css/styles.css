@@ -643,14 +643,6 @@ a:hover {
   line-height: 1.2;
 }
 
-.rank-hits {
-  font-size: clamp(0.62rem, 2.6vw, 0.68rem);
-  font-weight: 500;
-  color: var(--muted);
-  line-height: 1.25;
-  white-space: normal;
-}
-
 .match-feed {
   display: grid;
   gap: 10px;
