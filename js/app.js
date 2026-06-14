@@ -7,6 +7,8 @@ const ARROW_MATCH_LOOKBACK = 5;
 const CALENDAR_PILL_COUNT = 10;
 const THEME_KEY = "wc-pool-theme";
 const MUT = "Indian/Mauritius";
+// Kickoff times in pool.json are stored in UTC (FIFA schedule).
+const POOL_TIME_SOURCE = "UTC";
 
 const MONTHS = {
   Jan: 0,
@@ -113,8 +115,8 @@ function parseTimeParts(timeStr) {
   return [parseInt(hours, 10) || 0, parseInt(minutes, 10) || 0];
 }
 
-function mutToDate(year, monthIndex, day, hour, minute) {
-  return new Date(Date.UTC(year, monthIndex, day, hour - 4, minute));
+function poolTimeToDate(year, monthIndex, day, hour, minute) {
+  return new Date(Date.UTC(year, monthIndex, day, hour, minute));
 }
 
 function parseMatchDateTime(dateStr, timeStr) {
@@ -123,7 +125,7 @@ function parseMatchDateTime(dateStr, timeStr) {
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
     const [year, month, day] = dateStr.split("-").map((part) => parseInt(part, 10));
     const [hour, minute] = parseTimeParts(timeStr);
-    return mutToDate(year, month - 1, day, hour, minute);
+    return poolTimeToDate(year, month - 1, day, hour, minute);
   }
 
   const cleaned = String(dateStr).replace(",", "").trim();
@@ -134,7 +136,7 @@ function parseMatchDateTime(dateStr, timeStr) {
   if (monthIndex == null) return null;
 
   const [hour, minute] = parseTimeParts(timeStr);
-  return mutToDate(parseInt(parts[3], 10), monthIndex, parseInt(parts[2], 10), hour, minute);
+  return poolTimeToDate(parseInt(parts[3], 10), monthIndex, parseInt(parts[2], 10), hour, minute);
 }
 
 function getMatchWhen(match) {
@@ -151,7 +153,7 @@ function formatMatchWhen(match, { includeMut = true } = {}) {
   const when = getMatchWhen(match);
   if (!when) return match.date || "";
   const datePart = mutDateFormatter.format(when);
-  const timePart = match.time || mutTimeFormatter.format(when);
+  const timePart = mutTimeFormatter.format(when);
   const suffix = includeMut ? " MUT" : "";
   return `${datePart} · ${timePart}${suffix}`;
 }
@@ -164,8 +166,8 @@ function formatMutDateOnly(match) {
 
 function formatMutTimeOnly(match) {
   const when = getMatchWhen(match);
-  if (!when) return match.time || "";
-  return match.time || mutTimeFormatter.format(when);
+  if (!when) return "";
+  return mutTimeFormatter.format(when);
 }
 
 function renderCalendarRow(match) {
