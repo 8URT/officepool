@@ -1,7 +1,7 @@
 {
   "source": "openfootball",
-  "updatedAt": "2026-06-16T19:02:37.692135+00:00",
-  "matchCount": 16,
+  "updatedAt": "2026-06-16T22:00:04.955902+00:00",
+  "matchCount": 17,
   "matches": [
     {
       "key": "Mexico|South Africa",
@@ -14,7 +14,7 @@
       "round": "Matchday 1",
       "group": "Group A",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692043+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955787+00:00"
     },
     {
       "key": "Czechia|South Korea",
@@ -27,7 +27,7 @@
       "round": "Matchday 1",
       "group": "Group A",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692060+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955803+00:00"
     },
     {
       "key": "Bosnia & Herzegovina|Canada",
@@ -40,7 +40,7 @@
       "round": "Matchday 2",
       "group": "Group B",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692066+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955811+00:00"
     },
     {
       "key": "Paraguay|USA",
@@ -53,7 +53,7 @@
       "round": "Matchday 2",
       "group": "Group D",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692081+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955827+00:00"
     },
     {
       "key": "Australia|Turkiye",
@@ -66,7 +66,7 @@
       "round": "Matchday 3",
       "group": "Group D",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692084+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955831+00:00"
     },
     {
       "key": "Brazil|Morocco",
@@ -79,7 +79,7 @@
       "round": "Matchday 3",
       "group": "Group C",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692074+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955820+00:00"
     },
     {
       "key": "Haiti|Scotland",
@@ -92,7 +92,7 @@
       "round": "Matchday 3",
       "group": "Group C",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692077+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955823+00:00"
     },
     {
       "key": "Qatar|Switzerland",
@@ -105,7 +105,7 @@
       "round": "Matchday 3",
       "group": "Group B",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692070+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955815+00:00"
     },
     {
       "key": "Cura\u00e7ao|Germany",
@@ -118,7 +118,7 @@
       "round": "Matchday 4",
       "group": "Group E",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692088+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955836+00:00"
     },
     {
       "key": "Ecuador|Ivory Coast",
@@ -131,7 +131,7 @@
       "round": "Matchday 4",
       "group": "Group E",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692091+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955847+00:00"
     },
     {
       "key": "Japan|Netherlands",
@@ -144,7 +144,7 @@
       "round": "Matchday 4",
       "group": "Group F",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692094+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955851+00:00"
     },
     {
       "key": "Sweden|Tunisia",
@@ -157,7 +157,7 @@
       "round": "Matchday 4",
       "group": "Group F",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692097+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955855+00:00"
     },
     {
       "key": "Belgium|Egypt",
@@ -170,7 +170,7 @@
       "round": "Matchday 5",
       "group": "Group G",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692100+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955859+00:00"
     },
     {
       "key": "Iran|New Zealand",
@@ -183,7 +183,7 @@
       "round": "Matchday 5",
       "group": "Group G",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692103+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955863+00:00"
     },
     {
       "key": "Saudi Arabia|Uruguay",
@@ -196,7 +196,7 @@
       "round": "Matchday 5",
       "group": "Group H",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692112+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955870+00:00"
     },
     {
       "key": "Cape Verde|Spain",
@@ -209,7 +209,20 @@
       "round": "Matchday 5",
       "group": "Group H",
       "source": "openfootball",
-      "syncedAt": "2026-06-16T19:02:37.692109+00:00"
+      "syncedAt": "2026-06-16T22:00:04.955867+00:00"
+    },
+    {
+      "key": "France|Senegal",
+      "home": "France",
+      "away": "Senegal",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "status": "finished",
+      "date": "2026-06-16",
+      "round": "Matchday 6",
+      "group": "Group I",
+      "source": "openfootball",
+      "syncedAt": "2026-06-16T22:00:04.955874+00:00"
     }
   ]
 }
