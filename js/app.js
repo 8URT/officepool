@@ -295,17 +295,10 @@ function renderRankMove(currentRank, baselineRank) {
   return `<span class="rank-move same" title="Unchanged at #${currentRank}"><span class="rank-move-dot"></span></span>`;
 }
 
-function renderRankBaseline(currentRank, baselineRank) {
-  if (baselineRank == null) {
-    return `<span class="rank-baseline muted">—</span>`;
-  }
-
-  return `
-    <span class="rank-baseline-wrap" title="Rank before last ${ARROW_MATCH_LOOKBACK} results">
-      <span class="rank-baseline">#${baselineRank}</span>
-      ${renderRankMove(currentRank, baselineRank)}
-    </span>
-  `;
+function renderRankBaseline(baselineRank) {
+  return baselineRank != null
+    ? `<span class="rank-baseline" title="Rank before last ${ARROW_MATCH_LOOKBACK} results">#${baselineRank}</span>`
+    : `<span class="rank-baseline muted">—</span>`;
 }
 
 function renderRankResults(results) {
@@ -654,10 +647,13 @@ function renderRanking(standings, rankEvolution) {
         <li class="rank-row${topClass}">
           <div class="rank-pos-wrap">
             <span class="rank-pos">${rank}</span>
-            ${renderRankBaseline(rank, evolution.baselineRank)}
+            ${renderRankBaseline(evolution.baselineRank)}
           </div>
           ${renderRankResults(evolution.results)}
-          <button type="button" class="rank-name-btn" data-player="${entry.name}">${formatDisplayName(entry.name)}</button>
+          <div class="rank-name-wrap">
+            <button type="button" class="rank-name-btn" data-player="${entry.name}">${formatDisplayName(entry.name)}</button>
+            ${renderRankMove(rank, evolution.baselineRank)}
+          </div>
           <div class="rank-meta">
             <div class="rank-points">${entry.points}</div>
           </div>

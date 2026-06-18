@@ -564,13 +564,6 @@ a:hover {
   min-width: 0;
 }
 
-.rank-baseline-wrap {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  flex-shrink: 0;
-}
-
 .rank-baseline {
   font-variant-numeric: tabular-nums;
   font-size: 0.62rem;
@@ -581,6 +574,15 @@ a:hover {
 
 .rank-baseline.muted {
   opacity: 0.4;
+}
+
+.rank-name-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+  padding-right: 20px;
 }
 
 .rank-move {
@@ -754,7 +756,6 @@ a:hover {
   word-break: break-word;
   hyphens: auto;
   min-width: 0;
-  padding-right: 20px;
   text-align: right;
   cursor: pointer;
   text-decoration: none;
@@ -1189,7 +1190,7 @@ body.sheet-open {
   }
 
   .rank-pos-wrap { grid-area: pos; }
-  .rank-name-btn { grid-area: name; }
+  .rank-name-wrap { grid-area: name; }
   .rank-meta { grid-area: meta; }
   .rank-evolution {
     grid-area: evo;
