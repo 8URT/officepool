@@ -577,14 +577,25 @@ a:hover {
 }
 
 .rank-results {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0;
   flex-wrap: nowrap;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
   font-family: var(--font-tabular);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
+}
+
+[data-theme="dark"] .rank-results {
+  background: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .rank-results .evo-result {
