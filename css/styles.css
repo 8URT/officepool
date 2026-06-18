@@ -564,6 +564,13 @@ a:hover {
   min-width: 0;
 }
 
+.rank-baseline-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
 .rank-baseline {
   font-variant-numeric: tabular-nums;
   font-size: 0.62rem;
@@ -574,6 +581,55 @@ a:hover {
 
 .rank-baseline.muted {
   opacity: 0.4;
+}
+
+.rank-move {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.rank-move.up,
+.rank-move.down {
+  font-size: clamp(0.82rem, 3.2vw, 0.95rem);
+  font-weight: 900;
+}
+
+.rank-move.up {
+  color: #16a34a;
+}
+
+.rank-move.down {
+  color: #dc2626;
+}
+
+.rank-move.same {
+  width: 10px;
+  height: 10px;
+}
+
+.rank-move-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #eab308;
+  box-shadow: 0 0 0 1px rgba(234, 179, 8, 0.35);
+}
+
+[data-theme="dark"] .rank-move.up {
+  color: #4ade80;
+}
+
+[data-theme="dark"] .rank-move.down {
+  color: #f87171;
+}
+
+[data-theme="dark"] .rank-move-dot {
+  background: #facc15;
+  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.4);
 }
 
 .rank-results {

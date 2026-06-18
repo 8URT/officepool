@@ -283,10 +283,29 @@ function buildRankEvolution(pool, finishedMatches) {
   return evolution;
 }
 
-function renderRankBaseline(baselineRank) {
-  return baselineRank != null
-    ? `<span class="rank-baseline" title="Rank before last ${ARROW_MATCH_LOOKBACK} results">#${baselineRank}</span>`
-    : `<span class="rank-baseline muted">—</span>`;
+function renderRankMove(currentRank, baselineRank) {
+  if (baselineRank == null || currentRank == null) return "";
+
+  if (currentRank < baselineRank) {
+    return `<span class="rank-move up" title="Up from #${baselineRank} to #${currentRank}">▲</span>`;
+  }
+  if (currentRank > baselineRank) {
+    return `<span class="rank-move down" title="Down from #${baselineRank} to #${currentRank}">▼</span>`;
+  }
+  return `<span class="rank-move same" title="Unchanged at #${currentRank}"><span class="rank-move-dot"></span></span>`;
+}
+
+function renderRankBaseline(currentRank, baselineRank) {
+  if (baselineRank == null) {
+    return `<span class="rank-baseline muted">—</span>`;
+  }
+
+  return `
+    <span class="rank-baseline-wrap" title="Rank before last ${ARROW_MATCH_LOOKBACK} results">
+      <span class="rank-baseline">#${baselineRank}</span>
+      ${renderRankMove(currentRank, baselineRank)}
+    </span>
+  `;
 }
 
 function renderRankResults(results) {
@@ -635,7 +654,7 @@ function renderRanking(standings, rankEvolution) {
         <li class="rank-row${topClass}">
           <div class="rank-pos-wrap">
             <span class="rank-pos">${rank}</span>
-            ${renderRankBaseline(evolution.baselineRank)}
+            ${renderRankBaseline(rank, evolution.baselineRank)}
           </div>
           ${renderRankResults(evolution.results)}
           <button type="button" class="rank-name-btn" data-player="${entry.name}">${formatDisplayName(entry.name)}</button>
