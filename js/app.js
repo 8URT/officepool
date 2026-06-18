@@ -301,9 +301,9 @@ function renderRankResults(results) {
         : `Result ${index + 1}`;
 
       if (step.type === "win") {
-        return `<span class="evo-result win" title="${title}">W</span>`;
+        return `<strong class="evo-result win" title="${title}">W</strong>`;
       }
-      return `<span class="evo-result loss" title="${title}">L</span>`;
+      return `<strong class="evo-result loss" title="${title}">L</strong>`;
     })
     .join("");
 
