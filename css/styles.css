@@ -532,7 +532,7 @@ a:hover {
 }
 
 .rank-row {
-  --wl-pill-offset: 80px;
+  --wl-pill-offset: 60px;
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
