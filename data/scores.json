@@ -1,9 +1,9 @@
 {
   "source": "api-football+openfootball",
-  "updatedAt": "2026-06-18T19:06:42.185302+00:00",
-  "matchCount": 46,
-  "liveCount": 19,
-  "finishedCount": 27,
+  "updatedAt": "2026-06-18T19:17:29.160261+00:00",
+  "matchCount": 26,
+  "liveCount": 1,
+  "finishedCount": 25,
   "matches": [
     {
       "key": "Mexico|South Africa",
@@ -18,7 +18,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947337+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851553+00:00"
     },
     {
       "key": "Bosnia & Herzegovina|Canada",
@@ -33,7 +33,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947348+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851611+00:00"
     },
     {
       "key": "Czechia|South Korea",
@@ -48,7 +48,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947343+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851601+00:00"
     },
     {
       "key": "Brazil|Morocco",
@@ -63,7 +63,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947364+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851629+00:00"
     },
     {
       "key": "Qatar|Switzerland",
@@ -78,7 +78,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947359+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851623+00:00"
     },
     {
       "key": "Paraguay|USA",
@@ -93,7 +93,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947354+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851617+00:00"
     },
     {
       "key": "Australia|Turkiye",
@@ -108,7 +108,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947373+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851641+00:00"
     },
     {
       "key": "Cura\u00e7ao|Germany",
@@ -123,7 +123,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947378+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851646+00:00"
     },
     {
       "key": "Haiti|Scotland",
@@ -138,7 +138,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947368+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851635+00:00"
     },
     {
       "key": "Ecuador|Ivory Coast",
@@ -153,7 +153,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947387+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851656+00:00"
     },
     {
       "key": "Japan|Netherlands",
@@ -168,7 +168,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947382+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851651+00:00"
     },
     {
       "key": "Belgium|Egypt",
@@ -183,7 +183,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947401+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851672+00:00"
     },
     {
       "key": "Saudi Arabia|Uruguay",
@@ -198,7 +198,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947406+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851677+00:00"
     },
     {
       "key": "Cape Verde|Spain",
@@ -212,22 +212,7 @@
       "round": "Matchday 5",
       "group": "Group H",
       "source": "openfootball",
-      "syncedAt": "2026-06-18T19:06:41.743495+00:00"
-    },
-    {
-      "key": "Cape Verde Islands|Spain",
-      "home": "Spain",
-      "away": "Cape Verde Islands",
-      "scoreHome": 0,
-      "scoreAway": 0,
-      "status": "finished",
-      "isLive": false,
-      "minute": null,
-      "date": "2026-06-15",
-      "round": "Group Stage - 1",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947396+00:00"
+      "syncedAt": "2026-06-18T19:17:28.637247+00:00"
     },
     {
       "key": "Sweden|Tunisia",
@@ -242,7 +227,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947391+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851662+00:00"
     },
     {
       "key": "France|Senegal",
@@ -257,7 +242,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947415+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851686+00:00"
     },
     {
       "key": "Iran|New Zealand",
@@ -272,7 +257,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947410+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851682+00:00"
     },
     {
       "key": "Iraq|Norway",
@@ -287,7 +272,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947419+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851691+00:00"
     },
     {
       "key": "Algeria|Argentina",
@@ -302,7 +287,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947424+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851696+00:00"
     },
     {
       "key": "Austria|Jordan",
@@ -317,7 +302,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947428+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851700+00:00"
     },
     {
       "key": "Croatia|England",
@@ -332,7 +317,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947438+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851711+00:00"
     },
     {
       "key": "Ghana|Panama",
@@ -347,7 +332,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947442+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851716+00:00"
     },
     {
       "key": "DR Congo|Portugal",
@@ -361,102 +346,7 @@
       "round": "Matchday 7",
       "group": "Group K",
       "source": "openfootball",
-      "syncedAt": "2026-06-18T19:06:41.743520+00:00"
-    },
-    {
-      "key": "Congo DR|Portugal",
-      "home": "Portugal",
-      "away": "Congo DR",
-      "scoreHome": 1,
-      "scoreAway": 1,
-      "status": "finished",
-      "isLive": false,
-      "minute": null,
-      "date": "2026-06-17",
-      "round": "Group Stage - 1",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947433+00:00"
-    },
-    {
-      "key": "Ahlafors|Skara",
-      "home": "Ahlafors",
-      "away": "Skara",
-      "scoreHome": 1,
-      "scoreAway": 1,
-      "status": "live",
-      "isLive": true,
-      "minute": 90,
-      "statusText": "90'",
-      "date": "2026-06-18",
-      "round": "Norra G\u00f6taland - 13",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183285+00:00"
-    },
-    {
-      "key": "Arlanda|Stocksund",
-      "home": "Arlanda",
-      "away": "Stocksund",
-      "scoreHome": 1,
-      "scoreAway": 0,
-      "status": "live",
-      "isLive": true,
-      "minute": 90,
-      "statusText": "90'",
-      "date": "2026-06-18",
-      "round": "Norra - 13",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183271+00:00"
-    },
-    {
-      "key": "Boca Juniors Res.|Lan\u00fas Res.",
-      "home": "Boca Juniors Res.",
-      "away": "Lan\u00fas Res.",
-      "scoreHome": 0,
-      "scoreAway": 0,
-      "status": "live",
-      "isLive": true,
-      "minute": 49,
-      "statusText": "49'",
-      "date": "2026-06-18",
-      "round": "Regular Season - 18",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183327+00:00"
-    },
-    {
-      "key": "B\u00f6ljan|Onsala",
-      "home": "B\u00f6ljan",
-      "away": "Onsala",
-      "scoreHome": 0,
-      "scoreAway": 2,
-      "status": "live",
-      "isLive": true,
-      "minute": 80,
-      "statusText": "80'",
-      "date": "2026-06-18",
-      "round": "V\u00e4stra G\u00f6taland - 13",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183304+00:00"
-    },
-    {
-      "key": "Cear\u00e1 U20|Internacional U20",
-      "home": "Cear\u00e1 U20",
-      "away": "Internacional U20",
-      "scoreHome": 1,
-      "scoreAway": 1,
-      "status": "live",
-      "isLive": true,
-      "minute": 47,
-      "statusText": "47'",
-      "date": "2026-06-18",
-      "round": "Quarter-finals",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183362+00:00"
+      "syncedAt": "2026-06-18T19:17:28.637267+00:00"
     },
     {
       "key": "Czechia|South Africa",
@@ -471,183 +361,7 @@
       "round": "Group Stage - 2",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947452+00:00"
-    },
-    {
-      "key": "Astrio|Dalstorps",
-      "home": "Dalstorps",
-      "away": "Astrio",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "status": "live",
-      "isLive": true,
-      "minute": 78,
-      "statusText": "78'",
-      "date": "2026-06-18",
-      "round": "V\u00e4stra G\u00f6taland - 13",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183310+00:00"
-    },
-    {
-      "key": "Ferro 2|Newell's Old Boys Res.",
-      "home": "Ferro 2",
-      "away": "Newell's Old Boys Res.",
-      "scoreHome": 0,
-      "scoreAway": 0,
-      "status": "live",
-      "isLive": true,
-      "minute": 47,
-      "statusText": "47'",
-      "date": "2026-06-18",
-      "round": "Regular Season - 18",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183333+00:00"
-    },
-    {
-      "key": "Defensa y Justicia Res.|Hurac\u00e1n Res.",
-      "home": "Hurac\u00e1n Res.",
-      "away": "Defensa y Justicia Res.",
-      "scoreHome": 0,
-      "scoreAway": 1,
-      "status": "live",
-      "isLive": true,
-      "minute": 47,
-      "statusText": "47'",
-      "date": "2026-06-18",
-      "round": "Regular Season - 18",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183339+00:00"
-    },
-    {
-      "key": "Belgrano C\u00f3rdoba Res.|Independiente Res.",
-      "home": "Independiente Res.",
-      "away": "Belgrano C\u00f3rdoba Res.",
-      "scoreHome": 0,
-      "scoreAway": 2,
-      "status": "live",
-      "isLive": true,
-      "minute": 47,
-      "statusText": "47'",
-      "date": "2026-06-18",
-      "round": "Regular Season - 18",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183345+00:00"
-    },
-    {
-      "key": "Kumla|Tord",
-      "home": "Kumla",
-      "away": "Tord",
-      "scoreHome": 1,
-      "scoreAway": 0,
-      "status": "live",
-      "isLive": true,
-      "minute": 84,
-      "statusText": "84'",
-      "date": "2026-06-18",
-      "round": "Norra G\u00f6taland - 13",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183292+00:00"
-    },
-    {
-      "key": "Lindome|\u00c5storp",
-      "home": "Lindome",
-      "away": "\u00c5storp",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "status": "live",
-      "isLive": true,
-      "minute": 80,
-      "statusText": "80'",
-      "date": "2026-06-18",
-      "round": "V\u00e4stra G\u00f6taland - 13",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183316+00:00"
-    },
-    {
-      "key": "Quilmes 2|San Mart\u00edn San Juan Res.",
-      "home": "Quilmes 2",
-      "away": "San Mart\u00edn San Juan Res.",
-      "scoreHome": 2,
-      "scoreAway": 0,
-      "status": "live",
-      "isLive": true,
-      "minute": 46,
-      "statusText": "46'",
-      "date": "2026-06-18",
-      "round": "Regular Season - 18",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183351+00:00"
-    },
-    {
-      "key": "Galtabacks|Qviding FIF",
-      "home": "Qviding FIF",
-      "away": "Galtabacks",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "status": "live",
-      "isLive": true,
-      "minute": 81,
-      "statusText": "81'",
-      "date": "2026-06-18",
-      "round": "V\u00e4stra G\u00f6taland - 13",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183321+00:00"
-    },
-    {
-      "key": "Franke|Skiljebo",
-      "home": "Skiljebo",
-      "away": "Franke",
-      "scoreHome": 2,
-      "scoreAway": 2,
-      "status": "live",
-      "isLive": true,
-      "minute": 90,
-      "statusText": "90'",
-      "date": "2026-06-18",
-      "round": "Norra Svealand - 13",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:01:08.440978+00:00"
-    },
-    {
-      "key": "FBK Karlstad|Sollentuna",
-      "home": "Sollentuna",
-      "away": "FBK Karlstad",
-      "scoreHome": 0,
-      "scoreAway": 2,
-      "status": "live",
-      "isLive": true,
-      "minute": 79,
-      "statusText": "79'",
-      "date": "2026-06-18",
-      "round": "Norra - 13",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183279+00:00"
-    },
-    {
-      "key": "Storfors|T\u00e4fte\u00e5",
-      "home": "Storfors",
-      "away": "T\u00e4fte\u00e5",
-      "scoreHome": 0,
-      "scoreAway": 4,
-      "status": "live",
-      "isLive": true,
-      "minute": 82,
-      "statusText": "82'",
-      "date": "2026-06-18",
-      "round": "Norrland - 13",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183356+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851726+00:00"
     },
     {
       "key": "Bosnia & Herzegovina|Switzerland",
@@ -657,29 +371,13 @@
       "scoreAway": 0,
       "status": "live",
       "isLive": true,
-      "minute": 7,
-      "statusText": "7'",
+      "minute": 18,
+      "statusText": "18'",
       "date": "2026-06-18",
       "round": "Group Stage - 2",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183240+00:00"
-    },
-    {
-      "key": "R\u00e4ppe|S\u00f6lvesborg",
-      "home": "S\u00f6lvesborg",
-      "away": "R\u00e4ppe",
-      "scoreHome": 1,
-      "scoreAway": 1,
-      "status": "live",
-      "isLive": true,
-      "minute": 90,
-      "statusText": "90'",
-      "date": "2026-06-18",
-      "round": "S\u00f6dra G\u00f6taland - 13",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:01:08.440984+00:00"
+      "syncedAt": "2026-06-18T19:17:29.158749+00:00"
     },
     {
       "key": "Colombia|Uzbekistan",
@@ -694,23 +392,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:41.947447+00:00"
-    },
-    {
-      "key": "Stenungsund|V\u00e4nersborgs FK",
-      "home": "V\u00e4nersborgs FK",
-      "away": "Stenungsund",
-      "scoreHome": 2,
-      "scoreAway": 3,
-      "status": "live",
-      "isLive": true,
-      "minute": 90,
-      "statusText": "90'",
-      "date": "2026-06-18",
-      "round": "Norra G\u00f6taland - 13",
-      "group": null,
-      "source": "api-football",
-      "syncedAt": "2026-06-18T19:06:42.183298+00:00"
+      "syncedAt": "2026-06-18T19:17:28.851720+00:00"
     }
   ]
 }

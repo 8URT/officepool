@@ -216,7 +216,19 @@ def parse_api_fixture(fixture: dict) -> dict | None:
     return None
 
 
-def fetch_api_football() -> dict[str, dict]:
+def pool_keys(pool: dict) -> set[str]:
+    keys: set[str] = set()
+    for match in pool.get("matches") or []:
+        keys.add(match_key(match["home"], match["away"]))
+    return keys
+
+
+def filter_to_pool(matches: dict[str, dict], pool: dict) -> dict[str, dict]:
+    allowed = pool_keys(pool)
+    return {key: value for key, value in matches.items() if key in allowed}
+
+
+def fetch_api_football(pool: dict) -> dict[str, dict]:
     api_key = os.environ.get("API_FOOTBALL_KEY", "").strip()
     if not api_key:
         print("API_FOOTBALL_KEY not set — skipping API-Football (use .env locally)")
@@ -245,7 +257,7 @@ def fetch_api_football() -> dict[str, dict]:
             if entry:
                 parsed[entry["key"]] = entry
 
-    return parsed
+    return filter_to_pool(parsed, pool)
 
 
 def load_existing() -> dict[str, dict]:
@@ -373,10 +385,11 @@ def main() -> None:
     pool = load_pool()
     existing = load_existing()
     openfootball = fetch_openfootball()
-    api_football = fetch_api_football()
+    api_football = fetch_api_football(pool)
 
     # Priority: API-Football (live + FT) > openfootball FT > existing stored
     merged = merge_maps(existing, openfootball, api_football)
+    merged = filter_to_pool(merged, pool)
 
     update_snapshots(pool, merged)
 

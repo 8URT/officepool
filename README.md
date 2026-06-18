@@ -47,6 +47,8 @@ Re-sync scores every 60 seconds:
 
 Finished and live scores are saved to **`data/scores.json`**. Kickoff rank snapshots go to **`data/rank-snapshots.json`**.
 
+**Automatic:** GitHub Actions runs every **5 minutes** (`.github/workflows/sync-scores.yml`) and commits new results.
+
 **Manual sync:**
 
 ```bash
@@ -71,7 +73,7 @@ URL: **https://8urt.github.io/officepool/**
 | `scripts/sync-scores.py` | API-Football + openfootball → data files |
 | `scripts/watch-scores.sh` | Local 60s sync loop |
 | `.env.example` | API key template (copy to `.env`) |
-| `.github/workflows/sync-scores.yml` | Auto-sync scores every 30 min |
+| `.github/workflows/sync-scores.yml` | Auto-sync scores every 5 min |
 | `.github/workflows/deploy.yml` | Deploy to GitHub Pages |
 
 ## Data sources
