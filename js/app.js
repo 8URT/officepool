@@ -251,44 +251,33 @@ function buildRankEvolution(pool, finishedMatches) {
       : [];
   const windowMatches = chronological.slice(-ARROW_MATCH_LOOKBACK);
 
-  const steps = [beforeWindow];
-  for (let i = 0; i < windowMatches.length; i += 1) {
-    steps.push([...beforeWindow, ...windowMatches.slice(0, i + 1)]);
-  }
-
-  const ranksAtStep = steps.map((matches) => {
-    const standings = sortAndRankStandings(buildParticipantStats(pool, matches));
-    return Object.fromEntries(standings.map((entry) => [entry.name, entry.rank]));
-  });
+  const baselineStandings = sortAndRankStandings(buildParticipantStats(pool, beforeWindow));
+  const baselineRanks = Object.fromEntries(baselineStandings.map((entry) => [entry.name, entry.rank]));
 
   const evolution = {};
   for (const name of pool.participants) {
-    const baselineRank = ranksAtStep[0]?.[name] ?? null;
-    const arrows = [];
+    const predictions = pool.predictions[name] || {};
+    const results = [];
 
     for (let i = 0; i < ARROW_MATCH_LOOKBACK; i += 1) {
       if (i >= windowMatches.length) {
-        arrows.push({ type: "pending", match: null });
+        results.push({ type: "pending", match: null, label: "" });
         continue;
       }
 
-      const previous = ranksAtStep[i]?.[name];
-      const next = ranksAtStep[i + 1]?.[name];
       const match = windowMatches[i];
-      const label = match ? `${match.home} ${match.result.scoreHome}-${match.result.scoreAway} ${match.away}` : "";
+      const prediction = getPrediction(predictions, match.id);
+      const exact = isExactPrediction(prediction, match.result);
+      const label = `${match.home} ${match.result.scoreHome}-${match.result.scoreAway} ${match.away}`;
 
-      if (previous == null || next == null) {
-        arrows.push({ type: "pending", match, label });
-      } else if (next < previous) {
-        arrows.push({ type: "up", match, label, from: previous, to: next });
-      } else if (next > previous) {
-        arrows.push({ type: "down", match, label, from: previous, to: next });
-      } else {
-        arrows.push({ type: "same", match, label, from: previous, to: next });
-      }
+      results.push({
+        type: exact ? "win" : "loss",
+        match,
+        label,
+      });
     }
 
-    evolution[name] = { baselineRank, arrows };
+    evolution[name] = { baselineRank: baselineRanks[name] ?? null, results };
   }
 
   return evolution;
@@ -300,30 +289,27 @@ function renderRankBaseline(baselineRank) {
     : `<span class="rank-baseline muted">—</span>`;
 }
 
-function renderRankArrows(arrows) {
-  const arrowsHtml = arrows
+function renderRankResults(results) {
+  const resultsHtml = results
     .map((step, index) => {
       if (step.type === "pending") {
-        return `<span class="evo-arrow pending" title="Match ${index + 1} not played yet"></span>`;
+        return `<span class="evo-result pending" title="Match ${index + 1} not played yet">·</span>`;
       }
 
       const title = step.label
-        ? `Result ${index + 1}: ${step.label} (#${step.from} → #${step.to})`
+        ? `Result ${index + 1}: ${step.label} · ${step.type === "win" ? "Exact score (+1 pt)" : "Miss"}`
         : `Result ${index + 1}`;
 
-      if (step.type === "up") {
-        return `<span class="evo-arrow up" title="${title}">▲</span>`;
+      if (step.type === "win") {
+        return `<span class="evo-result win" title="${title}">W</span>`;
       }
-      if (step.type === "down") {
-        return `<span class="evo-arrow down" title="${title}">▼</span>`;
-      }
-      return `<span class="evo-arrow same" title="${title}"></span>`;
+      return `<span class="evo-result loss" title="${title}">L</span>`;
     })
     .join("");
 
   return `
     <div class="rank-evolution">
-      <div class="rank-arrows" aria-label="Last ${ARROW_MATCH_LOOKBACK} match movements">${arrowsHtml}</div>
+      <div class="rank-results" aria-label="Last ${ARROW_MATCH_LOOKBACK} results win or loss">${resultsHtml}</div>
     </div>
   `;
 }
@@ -642,7 +628,7 @@ function renderRanking(standings, rankEvolution) {
   els.rankingList.innerHTML = standings
     .map((entry) => {
       const rank = entry.rank;
-      const evolution = rankEvolution[entry.name] || { baselineRank: null, arrows: [] };
+      const evolution = rankEvolution[entry.name] || { baselineRank: null, results: [] };
       const topClass = rank <= 3 ? ` top-${rank}` : "";
 
       return `
@@ -651,7 +637,7 @@ function renderRanking(standings, rankEvolution) {
             <span class="rank-pos">${rank}</span>
             ${renderRankBaseline(evolution.baselineRank)}
           </div>
-          ${renderRankArrows(evolution.arrows)}
+          ${renderRankResults(evolution.results)}
           <button type="button" class="rank-name-btn" data-player="${entry.name}">${formatDisplayName(entry.name)}</button>
           <div class="rank-meta">
             <div class="rank-points">${entry.points}</div>
