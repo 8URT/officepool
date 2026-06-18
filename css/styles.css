@@ -1196,40 +1196,27 @@ body.sheet-open {
 
 @media (max-width: 420px) {
   .rank-row {
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas:
-      "pos name meta"
-      ". evo evo";
-    gap: 4px 8px;
     padding: 10px 8px;
   }
 
   .rank-pos-wrap {
-    position: static;
-    transform: none;
-    grid-area: pos;
+    left: 8px;
   }
 
   .rank-name-wrap {
-    grid-area: name;
-    padding-left: 0;
+    padding-left: calc(var(--wl-pill-offset) + 5.2em);
     padding-right: 5px;
   }
 
-  .rank-meta { grid-area: meta; }
-
-  .rank-evolution {
-    position: static;
-    transform: none;
-    grid-area: evo;
-    padding-left: var(--wl-pill-offset);
-    justify-content: flex-start;
-    padding-top: 2px;
+  .rank-results {
+    padding: 4px 7px;
+    flex-wrap: nowrap;
   }
 
-  .rank-results {
-    justify-content: flex-start;
-    flex-wrap: wrap;
+  .rank-results .evo-result {
+    width: 1.2em;
+    min-width: 1.2em;
+    font-size: clamp(0.68rem, 2.6vw, 0.78rem);
   }
 
   .hero-pills {
