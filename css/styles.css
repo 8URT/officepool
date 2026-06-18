@@ -622,14 +622,14 @@ a:hover {
 }
 
 .rank-move.same {
-  width: 10px;
-  height: 10px;
+  width: clamp(14px, 3.6vw, 16px);
+  height: clamp(14px, 3.6vw, 16px);
 }
 
 .rank-move-dot {
   display: block;
-  width: 8px;
-  height: 8px;
+  width: clamp(11px, 3vw, 13px);
+  height: clamp(11px, 3vw, 13px);
   border-radius: 50%;
   background: #eab308;
   box-shadow: 0 0 0 1px rgba(234, 179, 8, 0.35);
