@@ -1,6 +1,11 @@
 const POOL_URL = "data/pool.json";
-const STORED_SCORES_URL = "data/scores.json";
-const SNAPSHOTS_URL = "data/rank-snapshots.json";
+const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/8URT/officepool/main";
+const IS_LOCAL =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.protocol === "file:";
+const STORED_SCORES_URL = IS_LOCAL ? "data/scores.json" : `${GITHUB_RAW_BASE}/data/scores.json`;
+const SNAPSHOTS_URL = IS_LOCAL ? "data/rank-snapshots.json" : `${GITHUB_RAW_BASE}/data/rank-snapshots.json`;
 const SCORES_URL =
   "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json";
 const REFRESH_MS = 2 * 60 * 1000;
@@ -98,6 +103,7 @@ let poolData = null;
 let storedScoresMeta = null;
 let rankSnapshots = null;
 let refreshTimer = null;
+let liveClockTimer = null;
 let activeRankingTab = "virtual";
 let hadLiveMatches = false;
 let prevSpotlightScores = new Map();
@@ -399,6 +405,26 @@ function renderRankResults(results, { mode = "virtual" } = {}) {
   `;
 }
 
+function formatLiveMinute(result) {
+  if (!result?.isLive) return result?.statusText || "";
+
+  const statusText = result.statusText || "";
+  if (statusText === "HT" || statusText.endsWith(" HT")) return statusText || "HT";
+
+  const baseMinute = result.minute;
+  if (baseMinute == null) return statusText || "Live";
+
+  const syncedAt = result.syncedAt ? new Date(result.syncedAt) : null;
+  if (!syncedAt || Number.isNaN(syncedAt.getTime())) {
+    return statusText || `${baseMinute}'`;
+  }
+
+  const extra = Math.floor((Date.now() - syncedAt.getTime()) / 60000);
+  if (extra <= 0) return `${baseMinute}'`;
+
+  return `${Math.min(baseMinute + extra, 120)}'`;
+}
+
 function buildScoreMapFromStored(storedData) {
   const map = new Map();
   for (const match of storedData?.matches || []) {
@@ -415,6 +441,7 @@ function buildScoreMapFromStored(storedData) {
       isLive,
       minute: match.minute ?? null,
       statusText: match.statusText || (match.minute != null ? `${match.minute}'` : "Live"),
+      syncedAt: match.syncedAt || storedData?.updatedAt || null,
       date: match.date,
       round: match.round,
       group: match.group,
@@ -499,7 +526,7 @@ function renderPredictionRow(match, prediction, { mode = "pending" } = {}) {
   return `
     <article class="pred-row ${statusClass}${mode === "live" ? " live" : ""}">
       <div class="pred-top">
-        <span>${formatMatchWhen(match)}${mode === "live" && result.statusText ? ` · ${result.statusText}` : ""}</span>
+        <span>${formatMatchWhen(match)}${mode === "live" && result ? ` · ${formatLiveMinute(result)}` : ""}</span>
         ${badge}
       </div>
       <div class="pred-teams">${match.home} vs ${match.away}</div>
@@ -779,7 +806,7 @@ function renderMatchSpotlight(liveMatches, upcomingMatches) {
         const changed = prev !== undefined && prev !== scoreKey;
         prevSpotlightScores.set(key, scoreKey);
 
-        const minuteLabel = result.statusText || (result.minute != null ? `${result.minute}'` : "Live");
+        const minuteLabel = formatLiveMinute(result);
         const meta = [minuteLabel, result.group || match.group].filter(Boolean).join(" · ");
 
         return `
@@ -883,7 +910,7 @@ function renderMatchCard(match, pool, { variant = "finished" } = {}) {
   return `
     <article class="match-card ${cardClass}">
       <div class="match-meta">
-        <span>${whenLabel}${variant === "live" && result.statusText ? ` · ${result.statusText}` : ""}</span>
+        <span>${whenLabel}${variant === "live" && result ? ` · ${formatLiveMinute(result)}` : ""}</span>
         <span>${variant === "live" ? "Live" : result?.group || "Group stage"}</span>
       </div>
       <div class="match-teams">
@@ -967,8 +994,9 @@ async function refresh({ manual = false } = {}) {
 
     try {
       const liveData = await fetchJson(SCORES_URL);
-      scoreMap = buildScoreMapFromOpenfootball(liveData.matches || []);
-      if (scoreMap.size) liveSource = "openfootball";
+      const openfootballMap = buildScoreMapFromOpenfootball(liveData.matches || []);
+      if (openfootballMap.size) liveSource = "openfootball";
+      scoreMap = openfootballMap;
     } catch (error) {
       liveFetchFailed = true;
       console.warn("openfootball scores unavailable.", error);
@@ -977,8 +1005,8 @@ async function refresh({ manual = false } = {}) {
     try {
       const storedData = await fetchJson(STORED_SCORES_URL);
       storedScoresMeta = storedData;
-      scoreMap = mergeScoreMaps(buildScoreMapFromStored(storedData), scoreMap);
-      if (liveSource !== "openfootball" && scoreMap.size) liveSource = "stored";
+      scoreMap = mergeScoreMaps(scoreMap, buildScoreMapFromStored(storedData));
+      if (scoreMap.size) liveSource = storedData.source ? "stored" : liveSource;
     } catch (error) {
       storedFetchFailed = true;
       console.warn("Stored scores unavailable.", error);
@@ -1083,6 +1111,7 @@ async function refresh({ manual = false } = {}) {
     }
 
     scheduleRefresh(hasLive);
+    scheduleLiveClock(hasLive);
   } catch (error) {
     console.error(error);
     setStatus({ live: false, text: "Could not load pool data", updatedAt: null });
@@ -1097,6 +1126,24 @@ function scheduleRefresh(hasLive = false) {
   if (refreshTimer) window.clearInterval(refreshTimer);
   const interval = hasLive ? LIVE_REFRESH_MS : REFRESH_MS;
   refreshTimer = window.setInterval(() => refresh(), interval);
+}
+
+function scheduleLiveClock(hasLive = false) {
+  if (liveClockTimer) window.clearInterval(liveClockTimer);
+  if (!hasLive) return;
+
+  liveClockTimer = window.setInterval(() => {
+    if (!appState.liveMatches?.length) return;
+    renderMatchSpotlight(appState.liveMatches, appState.upcomingMatches);
+    if (poolData) {
+      renderMatches(
+        appState.liveMatches,
+        appState.finishedMatches,
+        appState.upcomingMatches,
+        poolData
+      );
+    }
+  }, 30000);
 }
 
 function startAutoRefresh() {
