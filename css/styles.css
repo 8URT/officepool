@@ -584,9 +584,9 @@ a:hover {
   flex-wrap: nowrap;
   padding: 5px 10px;
   border-radius: var(--radius-pill);
-  background: #0f172a;
-  border: 1px solid rgba(15, 23, 42, 0.2);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
   font-family: var(--font-tabular);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
@@ -596,6 +596,22 @@ a:hover {
   background: #0f172a;
   border-color: rgba(255, 255, 255, 0.12);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.rank-results .evo-result.win {
+  color: #15803d;
+}
+
+.rank-results .evo-result.loss {
+  color: #b91c1c;
+}
+
+[data-theme="dark"] .rank-results .evo-result.win {
+  color: var(--result-win);
+}
+
+[data-theme="dark"] .rank-results .evo-result.loss {
+  color: var(--result-loss);
 }
 
 .rank-results .evo-result {
@@ -612,14 +628,6 @@ a:hover {
   flex-shrink: 0;
   text-align: center;
   -webkit-font-smoothing: antialiased;
-}
-
-.rank-results .evo-result.win {
-  color: var(--result-win);
-}
-
-.rank-results .evo-result.loss {
-  color: var(--result-loss);
 }
 
 .rank-results .evo-result.pending {
