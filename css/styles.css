@@ -532,8 +532,10 @@ a:hover {
 }
 
 .rank-row {
+  --wl-pill-offset: 90px;
+  position: relative;
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 6px 8px;
   padding: 10px 10px;
@@ -544,10 +546,15 @@ a:hover {
 }
 
 .rank-pos-wrap {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: baseline;
   gap: 4px;
   flex-shrink: 0;
+  z-index: 1;
 }
 
 .rank-hint {
@@ -558,10 +565,15 @@ a:hover {
 }
 
 .rank-evolution {
+  position: absolute;
+  left: var(--wl-pill-offset);
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-width: 0;
+  z-index: 1;
 }
 
 .rank-baseline {
@@ -577,12 +589,14 @@ a:hover {
 }
 
 .rank-name-wrap {
+  grid-column: 1;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
-  padding-right: 20px;
+  padding-left: calc(var(--wl-pill-offset) + 5.75em);
+  padding-right: 5px;
 }
 
 .rank-move {
@@ -771,6 +785,7 @@ a:hover {
 }
 
 .rank-meta {
+  grid-column: 2;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -1181,23 +1196,34 @@ body.sheet-open {
 
 @media (max-width: 420px) {
   .rank-row {
-    grid-template-columns: 24px 1fr auto;
+    grid-template-columns: auto 1fr auto;
     grid-template-areas:
       "pos name meta"
-      "evo evo evo";
+      ". evo evo";
     gap: 4px 8px;
     padding: 10px 8px;
   }
 
-  .rank-pos-wrap { grid-area: pos; }
-  .rank-name-wrap { grid-area: name; }
+  .rank-pos-wrap {
+    position: static;
+    transform: none;
+    grid-area: pos;
+  }
+
+  .rank-name-wrap {
+    grid-area: name;
+    padding-left: 0;
+    padding-right: 5px;
+  }
+
   .rank-meta { grid-area: meta; }
+
   .rank-evolution {
+    position: static;
+    transform: none;
     grid-area: evo;
-    flex-direction: row;
-    align-items: center;
+    padding-left: var(--wl-pill-offset);
     justify-content: flex-start;
-    gap: 8px;
     padding-top: 2px;
   }
 
