@@ -1,11 +1,14 @@
 const POOL_URL = "data/pool.json";
 const STORED_SCORES_URL = "data/scores.json";
+const SNAPSHOTS_URL = "data/rank-snapshots.json";
 const SCORES_URL =
   "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json";
 const REFRESH_MS = 2 * 60 * 1000;
+const LIVE_REFRESH_MS = 60 * 1000;
 const ARROW_MATCH_LOOKBACK = 5;
 const CALENDAR_PILL_COUNT = 10;
 const THEME_KEY = "wc-pool-theme";
+const RANKING_TAB_KEY = "wc-pool-ranking-tab";
 const MUT = "Indian/Mauritius";
 // Kickoff times in pool.json are stored in UTC (FIFA schedule).
 const POOL_TIME_SOURCE = "UTC";
@@ -84,18 +87,29 @@ const els = {
   infoSheetTitle: document.getElementById("infoSheetTitle"),
   infoSheetSub: document.getElementById("infoSheetSub"),
   infoSheetBody: document.getElementById("infoSheetBody"),
+  matchSpotlight: document.getElementById("matchSpotlight"),
+  matchSpotlightPanel: document.getElementById("matchSpotlightPanel"),
+  virtualTab: document.getElementById("virtualTab"),
+  liveTab: document.getElementById("liveTab"),
+  rankHint: document.getElementById("rankHint"),
 };
 
 let poolData = null;
 let storedScoresMeta = null;
+let rankSnapshots = null;
 let refreshTimer = null;
+let activeRankingTab = "virtual";
+let hadLiveMatches = false;
+let prevSpotlightScores = new Map();
 let appState = {
   standings: [],
+  liveStandings: [],
   scoredMatches: [],
   finishedMatches: [],
   liveMatches: [],
   upcomingMatches: [],
   rankEvolution: {},
+  liveRankEvolution: {},
 };
 let activePlayer = null;
 let activePlayerTab = "played";
@@ -283,6 +297,51 @@ function buildRankEvolution(pool, finishedMatches) {
   return evolution;
 }
 
+function buildLiveRankEvolution(pool, finishedMatches, liveMatches, snapshots) {
+  const chronologicalFinished = [...finishedMatches].sort((a, b) => (a.when || 0) - (b.when || 0));
+  const primaryLive = liveMatches.length
+    ? [...liveMatches].sort((a, b) => (b.when || 0) - (a.when || 0))[0]
+    : null;
+  const primaryKey = primaryLive ? normalizeKey(primaryLive.home, primaryLive.away) : null;
+  const snapshot = primaryKey ? snapshots?.snapshots?.[primaryKey] : null;
+
+  const liveSlotCount = Math.min(liveMatches.length, ARROW_MATCH_LOOKBACK);
+  const finishedSlotCount = Math.max(0, ARROW_MATCH_LOOKBACK - liveSlotCount);
+  const recentFinished = chronologicalFinished.slice(-finishedSlotCount);
+
+  const evolution = {};
+  for (const name of pool.participants) {
+    const predictions = pool.predictions[name] || {};
+    const results = [];
+
+    for (const match of recentFinished) {
+      const prediction = getPrediction(predictions, match.id);
+      const exact = isExactPrediction(prediction, match.result);
+      const label = `${match.home} ${match.result.scoreHome}-${match.result.scoreAway} ${match.away}`;
+      results.push({ type: exact ? "win" : "loss", match, label });
+    }
+
+    for (let i = 0; i < liveSlotCount; i += 1) {
+      const match = liveMatches[i];
+      const label = match
+        ? `${match.home} ${match.result.scoreHome}-${match.result.scoreAway} ${match.away} · in play`
+        : "In play";
+      results.push({ type: "live-pending", match, label });
+    }
+
+    while (results.length < ARROW_MATCH_LOOKBACK) {
+      results.push({ type: "pending", match: null, label: "" });
+    }
+
+    evolution[name] = {
+      baselineRank: snapshot?.ranks?.[name] ?? null,
+      results,
+    };
+  }
+
+  return evolution;
+}
+
 function renderRankMove(currentRank, baselineRank) {
   if (baselineRank == null || currentRank == null) return "";
 
@@ -295,17 +354,26 @@ function renderRankMove(currentRank, baselineRank) {
   return `<span class="rank-move same" title="Unchanged at #${currentRank}"><span class="rank-move-dot"></span></span>`;
 }
 
-function renderRankBaseline(baselineRank) {
+function renderRankBaseline(baselineRank, { mode = "virtual" } = {}) {
+  const title =
+    mode === "live"
+      ? "Rank at kickoff of live match"
+      : `Rank before last ${ARROW_MATCH_LOOKBACK} results`;
   return baselineRank != null
-    ? `<span class="rank-baseline" title="Rank before last ${ARROW_MATCH_LOOKBACK} results">#${baselineRank}</span>`
+    ? `<span class="rank-baseline" title="${title}">#${baselineRank}</span>`
     : `<span class="rank-baseline muted">—</span>`;
 }
 
-function renderRankResults(results) {
+function renderRankResults(results, { mode = "virtual" } = {}) {
   const resultsHtml = results
     .map((step, index) => {
       if (step.type === "pending") {
         return `<span class="evo-result pending" title="Match ${index + 1} not played yet">·</span>`;
+      }
+
+      if (step.type === "live-pending") {
+        const title = step.label || `Match ${index + 1} in play`;
+        return `<strong class="evo-result live-pending" title="${title}">?</strong>`;
       }
 
       const title = step.label
@@ -319,9 +387,14 @@ function renderRankResults(results) {
     })
     .join("");
 
+  const ariaLabel =
+    mode === "live"
+      ? `Last results and live slots`
+      : `Last ${ARROW_MATCH_LOOKBACK} results win or loss`;
+
   return `
     <div class="rank-evolution">
-      <div class="rank-results" aria-label="Last ${ARROW_MATCH_LOOKBACK} results win or loss">${resultsHtml}</div>
+      <div class="rank-results" aria-label="${ariaLabel}">${resultsHtml}</div>
     </div>
   `;
 }
@@ -329,19 +402,23 @@ function renderRankResults(results) {
 function buildScoreMapFromStored(storedData) {
   const map = new Map();
   for (const match of storedData?.matches || []) {
-    if (match.scoreHome == null || match.scoreAway == null) continue;
+    const isLive = Boolean(match.isLive) || match.status === "live";
+    if (!isLive && (match.scoreHome == null || match.scoreAway == null)) continue;
+
     const key = match.key || normalizeKey(match.home, match.away);
     map.set(key, {
       home: match.home,
       away: match.away,
-      scoreHome: match.scoreHome,
-      scoreAway: match.scoreAway,
-      status: match.status || "finished",
-      isLive: false,
+      scoreHome: match.scoreHome ?? 0,
+      scoreAway: match.scoreAway ?? 0,
+      status: match.status || (isLive ? "live" : "finished"),
+      isLive,
+      minute: match.minute ?? null,
+      statusText: match.statusText || (match.minute != null ? `${match.minute}'` : "Live"),
       date: match.date,
       round: match.round,
       group: match.group,
-      source: "stored",
+      source: match.source || "stored",
     });
   }
   return map;
@@ -579,7 +656,7 @@ function isExactPrediction(prediction, result) {
   );
 }
 
-function computeStandings(pool, scoreMap) {
+function categorizeMatches(pool, scoreMap) {
   const scoredMatches = [];
   const finishedMatches = [];
   const liveMatches = [];
@@ -604,12 +681,35 @@ function computeStandings(pool, scoreMap) {
   liveMatches.sort((a, b) => (b.when || 0) - (a.when || 0));
   upcomingMatches.sort((a, b) => (a.when || 0) - (b.when || 0));
 
-  const standings = sortAndRankStandings(buildParticipantStats(pool, scoredMatches));
+  return { scoredMatches, finishedMatches, liveMatches, upcomingMatches };
+}
+
+function computeVirtualStandings(pool, finishedMatches) {
+  const standings = sortAndRankStandings(buildParticipantStats(pool, finishedMatches));
   const rankEvolution = buildRankEvolution(pool, finishedMatches);
+  return { standings, rankEvolution };
+}
+
+function computeLiveStandings(pool, finishedMatches, liveMatches, snapshots) {
+  const allForPoints = [...finishedMatches, ...liveMatches];
+  const standings = sortAndRankStandings(buildParticipantStats(pool, allForPoints));
+  const rankEvolution = buildLiveRankEvolution(pool, finishedMatches, liveMatches, snapshots);
+  return { standings, rankEvolution };
+}
+
+function computeStandings(pool, scoreMap, snapshots) {
+  const { scoredMatches, finishedMatches, liveMatches, upcomingMatches } = categorizeMatches(
+    pool,
+    scoreMap
+  );
+  const virtual = computeVirtualStandings(pool, finishedMatches);
+  const live = computeLiveStandings(pool, finishedMatches, liveMatches, snapshots);
 
   return {
-    standings,
-    rankEvolution,
+    standings: virtual.standings,
+    rankEvolution: virtual.rankEvolution,
+    liveStandings: live.standings,
+    liveRankEvolution: live.rankEvolution,
     scoredMatches,
     finishedMatches,
     liveMatches,
@@ -636,31 +736,127 @@ function winnersForMatch(pool, match) {
   );
 }
 
-function renderRanking(standings, rankEvolution) {
+function renderRanking(standings, rankEvolution, { mode = "virtual" } = {}) {
   els.rankingList.innerHTML = standings
     .map((entry) => {
       const rank = entry.rank;
       const evolution = rankEvolution[entry.name] || { baselineRank: null, results: [] };
       const topClass = rank <= 3 ? ` top-${rank}` : "";
+      const pointsTitle = mode === "live" ? "Provisional points (includes live scores)" : "";
+      const pointsClass = `rank-points${mode === "live" ? " live-provisional" : ""}`;
 
       return `
         <li class="rank-row${topClass}">
           <div class="rank-pos-wrap">
             <span class="rank-pos">${rank}</span>
-            ${renderRankBaseline(evolution.baselineRank)}
+            ${renderRankBaseline(evolution.baselineRank, { mode })}
           </div>
-          ${renderRankResults(evolution.results)}
+          ${renderRankResults(evolution.results, { mode })}
           <div class="rank-name-wrap">
             <button type="button" class="rank-name-btn" data-player="${entry.name}">${formatDisplayName(entry.name)}</button>
             ${renderRankMove(rank, evolution.baselineRank)}
           </div>
           <div class="rank-meta">
-            <div class="rank-points">${entry.points}</div>
+            <div class="${pointsClass}"${pointsTitle ? ` title="${pointsTitle}"` : ""}>${entry.points}</div>
           </div>
         </li>
       `;
     })
     .join("");
+}
+
+function renderMatchSpotlight(liveMatches, upcomingMatches) {
+  if (!els.matchSpotlight) return;
+
+  if (liveMatches.length) {
+    els.matchSpotlightPanel?.classList.add("is-live");
+    els.matchSpotlight.innerHTML = liveMatches
+      .map((match) => {
+        const result = match.result;
+        const key = normalizeKey(match.home, match.away);
+        const scoreKey = `${result.scoreHome}-${result.scoreAway}`;
+        const prev = prevSpotlightScores.get(key);
+        const changed = prev !== undefined && prev !== scoreKey;
+        prevSpotlightScores.set(key, scoreKey);
+
+        const minuteLabel = result.statusText || (result.minute != null ? `${result.minute}'` : "Live");
+        const meta = [minuteLabel, result.group || match.group].filter(Boolean).join(" · ");
+
+        return `
+          <article class="match-spotlight-card live${changed ? " score-changed" : ""}">
+            <div class="spotlight-top">
+              <span class="spotlight-badge live">
+                <span class="live-dot-inline"></span>
+                Live
+              </span>
+              <span class="spotlight-meta">${meta}</span>
+            </div>
+            <div class="spotlight-teams">
+              <span class="spotlight-team home">${match.home}</span>
+              <span class="spotlight-score">${result.scoreHome} - ${result.scoreAway}</span>
+              <span class="spotlight-team away">${match.away}</span>
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+    return;
+  }
+
+  els.matchSpotlightPanel?.classList.remove("is-live");
+  const next = upcomingMatches[0];
+  if (!next) {
+    els.matchSpotlight.innerHTML = `<div class="empty-state">No upcoming matches in the schedule.</div>`;
+    return;
+  }
+
+  els.matchSpotlight.innerHTML = `
+    <article class="match-spotlight-card next">
+      <div class="spotlight-top">
+        <span class="spotlight-badge next">Up next</span>
+        <span class="spotlight-meta">${formatMatchWhen(next)}</span>
+      </div>
+      <div class="spotlight-teams">
+        <span class="spotlight-team home">${next.home}</span>
+        <span class="spotlight-kickoff">vs</span>
+        <span class="spotlight-team away">${next.away}</span>
+      </div>
+    </article>
+  `;
+}
+
+function setRankingTab(tabName) {
+  activeRankingTab = tabName;
+  localStorage.setItem(RANKING_TAB_KEY, tabName);
+  els.virtualTab?.classList.toggle("active", tabName === "virtual");
+  els.liveTab?.classList.toggle("active", tabName === "live");
+  els.virtualTab?.setAttribute("aria-selected", String(tabName === "virtual"));
+  els.liveTab?.setAttribute("aria-selected", String(tabName === "live"));
+  renderActiveRanking();
+}
+
+function renderActiveRanking() {
+  const isLiveTab = activeRankingTab === "live";
+  const standings = isLiveTab ? appState.liveStandings : appState.standings;
+  const evolution = isLiveTab ? appState.liveRankEvolution : appState.rankEvolution;
+  renderRanking(standings, evolution, { mode: isLiveTab ? "live" : "virtual" });
+  if (els.rankHint) {
+    els.rankHint.textContent = isLiveTab
+      ? "Provisional rank · # at kickoff · W/L + ? for live · ▲/▼ vs kickoff"
+      : "Rank, previous rank (#), W/L pill, name with ▲/▼/dot, then points";
+  }
+}
+
+function updateLiveTabVisibility(hasLive) {
+  els.liveTab?.classList.toggle("hidden", !hasLive);
+  if (!hasLive && activeRankingTab === "live") {
+    setRankingTab("virtual");
+  }
+  if (hasLive && !hadLiveMatches) {
+    setRankingTab("live");
+    showToast("Match live — live ranking");
+  }
+  hadLiveMatches = hasLive;
 }
 
 function renderMatchCard(match, pool, { variant = "finished" } = {}) {
@@ -789,22 +985,43 @@ async function refresh({ manual = false } = {}) {
       if (liveSource !== "openfootball") storedScoresMeta = null;
     }
 
-    const { standings, rankEvolution, scoredMatches, finishedMatches, liveMatches, upcomingMatches } =
-      computeStandings(poolData, scoreMap);
+    try {
+      rankSnapshots = await fetchJson(SNAPSHOTS_URL);
+    } catch (error) {
+      console.warn("Rank snapshots unavailable.", error);
+      rankSnapshots = { snapshots: {} };
+    }
 
+    const {
+      standings,
+      rankEvolution,
+      liveStandings,
+      liveRankEvolution,
+      scoredMatches,
+      finishedMatches,
+      liveMatches,
+      upcomingMatches,
+    } = computeStandings(poolData, scoreMap, rankSnapshots);
+
+    const hasLive = liveMatches.length > 0;
     const newResults = finishedMatches.filter(
       (match) => !prevFinishedKeys.has(normalizeKey(match.home, match.away))
     );
 
     appState = {
       standings,
+      liveStandings,
       scoredMatches,
       finishedMatches,
       liveMatches,
       upcomingMatches,
       rankEvolution,
+      liveRankEvolution,
     };
-    renderRanking(standings, rankEvolution);
+
+    updateLiveTabVisibility(hasLive);
+    renderMatchSpotlight(liveMatches, upcomingMatches);
+    renderActiveRanking();
     renderMatches(liveMatches, finishedMatches, upcomingMatches, poolData);
 
     if (activePlayer) renderPlayerSheetContent(activePlayer);
@@ -826,6 +1043,8 @@ async function refresh({ manual = false } = {}) {
         ? ` · ${storedScoresMeta.matchCount} stored`
         : "";
 
+    const liveLabel = hasLive ? ` · ${liveMatches.length} live now` : "";
+
     const sourceHint =
       liveFetchFailed && storedFetchFailed
         ? " · could not reach score sources"
@@ -834,13 +1053,15 @@ async function refresh({ manual = false } = {}) {
           : "";
 
     setStatus({
-      live: liveSource === "openfootball",
+      live: hasLive || liveSource === "openfootball",
       text:
-        liveSource === "openfootball"
-          ? `${finishedMatches.length} results · live · Leader: ${leaderLabel}${storedLabel}`
-          : liveSource === "stored"
-            ? `${finishedMatches.length} results · stored memory · Leader: ${leaderLabel}${sourceHint}`
-            : `Waiting for results · Leader: ${leaderLabel}${sourceHint}`,
+        hasLive
+          ? `${finishedMatches.length} FT · ${liveMatches.length} live · Leader: ${leaderLabel}${liveLabel}`
+          : liveSource === "openfootball"
+            ? `${finishedMatches.length} results · live · Leader: ${leaderLabel}${storedLabel}`
+            : liveSource === "stored"
+              ? `${finishedMatches.length} results · stored memory · Leader: ${leaderLabel}${sourceHint}`
+              : `Waiting for results · Leader: ${leaderLabel}${sourceHint}`,
       updatedAt: new Date(),
     });
 
@@ -854,12 +1075,14 @@ async function refresh({ manual = false } = {}) {
         showToast(`${finishedMatches.length} results · ranking updated`);
       } else if (liveFetchFailed && storedFetchFailed) {
         showToast("Could not pull results — check your connection");
+      } else if (hasLive) {
+        showToast(`Live · ${liveMatches.length} match(es) in play`);
       } else {
         showToast(`${finishedMatches.length} results · no new scores yet`);
       }
     }
 
-    scheduleRefresh();
+    scheduleRefresh(hasLive);
   } catch (error) {
     console.error(error);
     setStatus({ live: false, text: "Could not load pool data", updatedAt: null });
@@ -870,9 +1093,10 @@ async function refresh({ manual = false } = {}) {
   }
 }
 
-function scheduleRefresh() {
+function scheduleRefresh(hasLive = false) {
   if (refreshTimer) window.clearInterval(refreshTimer);
-  refreshTimer = window.setInterval(() => refresh(), REFRESH_MS);
+  const interval = hasLive ? LIVE_REFRESH_MS : REFRESH_MS;
+  refreshTimer = window.setInterval(() => refresh(), interval);
 }
 
 function startAutoRefresh() {
@@ -881,6 +1105,18 @@ function startAutoRefresh() {
 
 els.refreshBtn.addEventListener("click", () => refresh({ manual: true }));
 els.pullResultsBtn?.addEventListener("click", () => refresh({ manual: true }));
+
+els.virtualTab?.addEventListener("click", () => setRankingTab("virtual"));
+els.liveTab?.addEventListener("click", () => setRankingTab("live"));
+
+const savedRankingTab = localStorage.getItem(RANKING_TAB_KEY);
+if (savedRankingTab === "live" || savedRankingTab === "virtual") {
+  activeRankingTab = savedRankingTab;
+}
+els.virtualTab?.classList.toggle("active", activeRankingTab === "virtual");
+els.liveTab?.classList.toggle("active", activeRankingTab === "live");
+els.virtualTab?.setAttribute("aria-selected", String(activeRankingTab === "virtual"));
+els.liveTab?.setAttribute("aria-selected", String(activeRankingTab === "live"));
 
 function applyTheme(theme) {
   const metaTheme = document.querySelector('meta[name="theme-color"]');

@@ -1,15 +1,15 @@
 # Office World Cup 2026 Pool — Live Ranking
 
-Mobile-first live leaderboard for your office football pool. Predictions and fixtures live in `data/pool.json` (fixed for the tournament). Match results are stored in `data/scores.json` and synced from [openfootball](https://github.com/openfootball/worldcup.json).
+Mobile-first live leaderboard for your office football pool. Predictions and fixtures live in `data/pool.json` (fixed for the tournament). Match results are stored in `data/scores.json` and synced from openfootball + API-Football (live).
 
 **Live site:** https://8urt.github.io/officepool/
 
 ## What you get
 
-- **Virtual ranking** — sorted by exact-score hits (1 point each), with tied ranks
-- **Movement arrows** — last 5 results with ▲ / ▼ / dot per match
-- **Score memory** — `data/scores.json` keeps all finished results (synced every 30 min)
-- **Live + stored** — site merges stored scores with live API on each refresh
+- **Virtual ranking** — official standings from finished matches only; W/L pill for last 5 FT results
+- **Live ranking tab** — appears during live matches; provisional points and ▲/▼ vs kickoff snapshot
+- **Match spotlight** — live score box above rankings (or next match when idle)
+- **Score memory** — `data/scores.json` + `data/rank-snapshots.json`
 - **Player sheets** — tap a name to see predictions vs actual scores
 - **Dark mode** — default dark theme, toggle saved in browser
 
@@ -20,28 +20,44 @@ Each participant gets **1 point per exact score** prediction. Correct winner alo
 ## Running locally
 
 ```bash
+cp .env.example .env
+# Edit .env and add your API-Football key (direct subscription, api-sports.io)
+
+python3 scripts/sync-scores.py
 python3 -m http.server 8080
 ```
 
 Open **http://localhost:8080**
 
+### Live match days
+
+Re-sync scores every 60 seconds:
+
+```bash
+./scripts/watch-scores.sh 60
+```
+
+## API key (keep private)
+
+- **Local:** put your key in `.env` as `API_FOOTBALL_KEY=...` (never commit `.env`)
+- **GitHub (when you push):** add repository secret `API_FOOTBALL_KEY` under Settings → Secrets → Actions
+- The browser never calls API-Football directly — only `scripts/sync-scores.py` uses the key
+
 ## Scores (the only thing that updates)
 
-Finished match scores are saved to **`data/scores.json`**. This is the site's shared memory — rankings still work if the live API is temporarily down.
-
-**Automatic:** GitHub Actions runs every 30 minutes (`.github/workflows/sync-scores.yml`) and commits new results.
+Finished and live scores are saved to **`data/scores.json`**. Kickoff rank snapshots go to **`data/rank-snapshots.json`**.
 
 **Manual sync:**
 
 ```bash
 python3 scripts/sync-scores.py
-git add data/scores.json && git commit -m "Sync scores" && git push
 ```
 
-## Deploy
+## Deploy (when ready)
 
-1. **Settings → Pages → Source:** GitHub Actions
-2. Push to `main` — the deploy workflow syncs scores and publishes the site
+1. Add `API_FOOTBALL_KEY` secret on GitHub
+2. **Settings → Pages → Source:** GitHub Actions
+3. Push to `main` — deploy workflow syncs scores and publishes the site
 
 URL: **https://8urt.github.io/officepool/**
 
@@ -50,16 +66,20 @@ URL: **https://8urt.github.io/officepool/**
 | File | Purpose |
 |------|---------|
 | `data/pool.json` | Participants, fixtures, predictions (fixed) |
-| `data/scores.json` | Stored match results (updates during tournament) |
-| `scripts/sync-scores.py` | openfootball → `data/scores.json` |
+| `data/scores.json` | Stored match results (FT + live) |
+| `data/rank-snapshots.json` | Rank at kickoff per live match |
+| `scripts/sync-scores.py` | API-Football + openfootball → data files |
+| `scripts/watch-scores.sh` | Local 60s sync loop |
+| `.env.example` | API key template (copy to `.env`) |
 | `.github/workflows/sync-scores.yml` | Auto-sync scores every 30 min |
 | `.github/workflows/deploy.yml` | Deploy to GitHub Pages |
 
-## Live scores source
+## Data sources
 
-`https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json`
+- **API-Football** (live + FT when key is set): `https://v3.football.api-sports.io`
+- **openfootball** (FT fallback): `https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json`
 
-The site loads stored scores first, then merges live API data on top.
+The site loads stored scores from `data/scores.json` and merges openfootball on refresh.
 
 ## Archive
 
