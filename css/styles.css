@@ -32,8 +32,8 @@
   --font-body: "Inter", system-ui, sans-serif;
   --font-mono: "Inter", system-ui, sans-serif;
   --font-tabular: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
-  --result-win: #15803d;
-  --result-loss: #b91c1c;
+  --result-win: #4ade80;
+  --result-loss: #f87171;
 }
 
 [data-theme="dark"] {
@@ -584,18 +584,18 @@ a:hover {
   flex-wrap: nowrap;
   padding: 5px 10px;
   border-radius: var(--radius-pill);
-  background: #ffffff;
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  background: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.2);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
   font-family: var(--font-tabular);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0;
 }
 
 [data-theme="dark"] .rank-results {
-  background: #ffffff;
-  border-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
 }
 
 .rank-results .evo-result {
