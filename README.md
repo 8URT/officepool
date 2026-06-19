@@ -37,6 +37,10 @@ Re-sync scores every 60 seconds:
 ./scripts/watch-scores.sh 60
 ```
 
+To keep **GitHub / the online site** in sync while you watch locally, add `PUBLISH_SCORES=1` to `.env` (or run `PUBLISH_SCORES=1 ./scripts/watch-scores.sh 60`). That pushes `data/scores.json` after each sync.
+
+> GitHub’s scheduled Actions often run every 1–4 hours, not every 5 minutes. Local publish during matches is the reliable way to keep the live site current.
+
 ## API key (keep private)
 
 - **Local:** put your key in `.env` as `API_FOOTBALL_KEY=...` (never commit `.env`)
@@ -47,7 +51,7 @@ Re-sync scores every 60 seconds:
 
 Finished and live scores are saved to **`data/scores.json`**. Kickoff rank snapshots go to **`data/rank-snapshots.json`**.
 
-**Automatic:** GitHub Actions runs every **5 minutes** (`.github/workflows/sync-scores.yml`) and commits new results.
+**Automatic:** GitHub Actions syncs scores when scheduled (often every 1–4 hours in practice, not every 5 minutes).
 
 **Manual sync:**
 

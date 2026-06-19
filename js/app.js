@@ -1108,16 +1108,23 @@ async function refresh({ manual = false } = {}) {
           ? " · live API blocked, using stored"
           : "";
 
+    const scoresUpdatedMs = storedScoresMeta?.updatedAt
+      ? Date.now() - new Date(storedScoresMeta.updatedAt).getTime()
+      : null;
+    const scoresStale =
+      !IS_LOCAL && scoresUpdatedMs != null && scoresUpdatedMs > 15 * 60 * 1000;
+    const staleLabel = scoresStale ? " · scores updating slowly" : "";
+
     setStatus({
       live: hasLive || liveSource === "openfootball",
       text:
         hasLive
-          ? `${finishedMatches.length} FT · ${liveMatches.length} live · Leader: ${leaderLabel}${liveLabel}`
+          ? `${finishedMatches.length} FT · ${liveMatches.length} live · Leader: ${leaderLabel}${liveLabel}${staleLabel}`
           : liveSource === "openfootball"
-            ? `${finishedMatches.length} results · live · Leader: ${leaderLabel}${storedLabel}`
+            ? `${finishedMatches.length} results · live · Leader: ${leaderLabel}${storedLabel}${staleLabel}`
             : liveSource === "stored"
-              ? `${finishedMatches.length} results · stored memory · Leader: ${leaderLabel}${sourceHint}`
-              : `Waiting for results · Leader: ${leaderLabel}${sourceHint}`,
+              ? `${finishedMatches.length} results · stored memory · Leader: ${leaderLabel}${sourceHint}${staleLabel}`
+              : `Waiting for results · Leader: ${leaderLabel}${sourceHint}${staleLabel}`,
       updatedAt: new Date(),
     });
 

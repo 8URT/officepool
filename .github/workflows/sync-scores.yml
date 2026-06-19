@@ -28,4 +28,9 @@ jobs:
           git add data/scores.json data/rank-snapshots.json
           git diff --staged --quiet && echo "No score changes" && exit 0
           git commit -m "Sync scores from API-Football"
-          git push
+          for attempt in 1 2 3; do
+            git pull --rebase origin main && git push origin main && exit 0
+            echo "Push attempt $attempt failed, retrying..."
+            sleep 5
+          done
+          exit 1
