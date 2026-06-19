@@ -1,5 +1,5 @@
 const POOL_URL = "data/pool.json";
-const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/8URT/officepool/main";
+const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/8URT/officepool/refs/heads/main";
 const IS_LOCAL =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1" ||
