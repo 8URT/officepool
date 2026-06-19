@@ -373,6 +373,42 @@ def update_snapshots(pool: dict, merged: dict[str, dict]) -> None:
     save_snapshots(snapshot_data)
 
 
+def reconcile_live_status(
+    merged: dict[str, dict],
+    openfootball: dict[str, dict],
+    api_football: dict[str, dict],
+) -> None:
+    now = datetime.now(timezone.utc)
+
+    for key, match in list(merged.items()):
+        if not match.get("isLive"):
+            continue
+
+        if key in api_football and not api_football[key].get("isLive"):
+            merged[key] = api_football[key]
+            continue
+
+        if key in openfootball:
+            merged[key] = openfootball[key]
+            continue
+
+        synced_at = match.get("syncedAt")
+        if not synced_at:
+            continue
+
+        synced = datetime.fromisoformat(synced_at.replace("Z", "+00:00"))
+        age_s = (now - synced).total_seconds()
+        minute = match.get("minute") or 0
+        if (minute >= 70 and age_s >= 10 * 60) or age_s >= 45 * 60:
+            merged[key] = {
+                **match,
+                "status": "finished",
+                "isLive": False,
+                "minute": None,
+                "statusText": None,
+            }
+
+
 def merge_maps(*maps: dict[str, dict]) -> dict[str, dict]:
     merged: dict[str, dict] = {}
     for item in maps:
@@ -390,6 +426,7 @@ def main() -> None:
     # Priority: API-Football (live + FT) > openfootball FT > existing stored
     merged = merge_maps(existing, openfootball, api_football)
     merged = filter_to_pool(merged, pool)
+    reconcile_live_status(merged, openfootball, api_football)
 
     update_snapshots(pool, merged)
 

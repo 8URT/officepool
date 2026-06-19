@@ -453,8 +453,35 @@ function buildScoreMapFromStored(storedData) {
 
 function mergeScoreMaps(baseMap, overlayMap) {
   const merged = new Map(baseMap);
-  for (const [key, value] of overlayMap) merged.set(key, value);
+  for (const [key, value] of overlayMap) {
+    const base = merged.get(key);
+    // Don't let a stale stored "live" row hide a confirmed full-time result.
+    if (value.isLive && base && !base.isLive) continue;
+    merged.set(key, value);
+  }
   return merged;
+}
+
+function normalizeLiveResult(result) {
+  if (!result?.isLive) return result;
+
+  const syncedAt = result.syncedAt ? new Date(result.syncedAt).getTime() : NaN;
+  if (Number.isNaN(syncedAt)) return result;
+
+  const ageMs = Date.now() - syncedAt;
+  const minute = result.minute ?? 0;
+  const looksFinished = minute >= 70 && ageMs >= 10 * 60 * 1000;
+  const looksAbandoned = ageMs >= 45 * 60 * 1000;
+
+  if (!looksFinished && !looksAbandoned) return result;
+
+  return {
+    ...result,
+    isLive: false,
+    status: "finished",
+    minute: null,
+    statusText: null,
+  };
 }
 
 function buildScoreMapFromOpenfootball(apiMatches) {
@@ -690,7 +717,8 @@ function categorizeMatches(pool, scoreMap) {
   const upcomingMatches = [];
 
   for (const match of pool.matches) {
-    const result = resolveMatchResult(match, scoreMap);
+    const rawResult = resolveMatchResult(match, scoreMap);
+    const result = rawResult ? normalizeLiveResult(rawResult) : null;
     const when = getMatchWhen(match);
     const entry = { ...match, result, when };
 
