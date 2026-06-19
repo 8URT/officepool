@@ -4,3 +4,4 @@ World Cup 2026.xlsx
 *.xlsx
 .env
 .env.local
+.publish-lock/
