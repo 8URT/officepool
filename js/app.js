@@ -1,5 +1,6 @@
 const POOL_URL = "data/pool.json";
-const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/8URT/officepool/refs/heads/main";
+const GITHUB_REPO = "8URT/officepool";
+const GITHUB_RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_REPO}/refs/heads/main`;
 const IS_LOCAL =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1" ||
@@ -99,7 +100,7 @@ const els = {
   rankHint: document.getElementById("rankHint"),
 };
 
-let poolData = null;
+let lastSnapshotsScoresVersion = null;
 let storedScoresMeta = null;
 let rankSnapshots = null;
 let refreshTimer = null;
@@ -974,17 +975,37 @@ function setStatus({ live, text, updatedAt }) {
   els.liveDot.classList.toggle("live", Boolean(live));
 }
 
-async function fetchJson(url, { timeoutMs = 15000 } = {}) {
+async function fetchJson(url, { timeoutMs = 15000, headers = {} } = {}) {
   const bustUrl = `${url}${url.includes("?") ? "&" : "?"}_=${Date.now()}`;
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetch(bustUrl, { cache: "no-store", signal: controller.signal });
+    const response = await fetch(bustUrl, {
+      cache: "no-store",
+      signal: controller.signal,
+      headers,
+    });
     if (!response.ok) throw new Error(`Failed to fetch ${url}`);
     return await response.json();
   } finally {
     window.clearTimeout(timeoutId);
+  }
+}
+
+async function fetchGithubDataFile(path) {
+  if (IS_LOCAL) {
+    return fetchJson(path.startsWith("data/") ? path : `data/${path}`);
+  }
+
+  const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/contents/${path}?ref=main`;
+  try {
+    return await fetchJson(apiUrl, {
+      headers: { Accept: "application/vnd.github.raw+json" },
+    });
+  } catch (error) {
+    console.warn(`GitHub API blocked for ${path}, falling back to raw CDN`, error);
+    return fetchJson(`${GITHUB_RAW_BASE}/${path}`);
   }
 }
 
@@ -1031,7 +1052,7 @@ async function refresh({ manual = false } = {}) {
     }
 
     try {
-      const storedData = await fetchJson(STORED_SCORES_URL);
+      const storedData = await fetchGithubDataFile("data/scores.json");
       storedScoresMeta = storedData;
       scoreMap = mergeScoreMaps(scoreMap, buildScoreMapFromStored(storedData));
       if (scoreMap.size) liveSource = storedData.source ? "stored" : liveSource;
@@ -1042,10 +1063,14 @@ async function refresh({ manual = false } = {}) {
     }
 
     try {
-      rankSnapshots = await fetchJson(SNAPSHOTS_URL);
+      const scoresVersion = storedScoresMeta?.updatedAt || null;
+      if (!rankSnapshots || scoresVersion !== lastSnapshotsScoresVersion) {
+        rankSnapshots = await fetchGithubDataFile("data/rank-snapshots.json");
+        lastSnapshotsScoresVersion = scoresVersion;
+      }
     } catch (error) {
       console.warn("Rank snapshots unavailable.", error);
-      rankSnapshots = { snapshots: {} };
+      rankSnapshots = rankSnapshots || { snapshots: {} };
     }
 
     const {
