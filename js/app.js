@@ -100,6 +100,7 @@ const els = {
   rankHint: document.getElementById("rankHint"),
 };
 
+let poolData = null;
 let lastSnapshotsScoresVersion = null;
 let storedScoresMeta = null;
 let rankSnapshots = null;
