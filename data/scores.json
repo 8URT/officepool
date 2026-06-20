@@ -1,6 +1,6 @@
 {
   "source": "api-football+openfootball",
-  "updatedAt": "2026-06-20T19:11:15.282286+00:00",
+  "updatedAt": "2026-06-20T19:12:25.851774+00:00",
   "matchCount": 33,
   "liveCount": 0,
   "finishedCount": 33,
@@ -18,7 +18,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.032898+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546375+00:00"
     },
     {
       "key": "Bosnia & Herzegovina|Canada",
@@ -33,7 +33,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.032942+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546416+00:00"
     },
     {
       "key": "Czechia|South Korea",
@@ -48,7 +48,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.032934+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546408+00:00"
     },
     {
       "key": "Brazil|Morocco",
@@ -63,7 +63,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.032961+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546437+00:00"
     },
     {
       "key": "Qatar|Switzerland",
@@ -78,7 +78,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.032955+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546431+00:00"
     },
     {
       "key": "Paraguay|USA",
@@ -93,7 +93,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.032949+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546424+00:00"
     },
     {
       "key": "Australia|Turkiye",
@@ -108,7 +108,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.032973+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546450+00:00"
     },
     {
       "key": "Cura\u00e7ao|Germany",
@@ -123,7 +123,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.032980+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546456+00:00"
     },
     {
       "key": "Haiti|Scotland",
@@ -138,7 +138,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.032967+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546443+00:00"
     },
     {
       "key": "Ecuador|Ivory Coast",
@@ -153,7 +153,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.032992+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546468+00:00"
     },
     {
       "key": "Japan|Netherlands",
@@ -168,7 +168,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.032986+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546462+00:00"
     },
     {
       "key": "Belgium|Egypt",
@@ -183,7 +183,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033011+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546485+00:00"
     },
     {
       "key": "Saudi Arabia|Uruguay",
@@ -198,7 +198,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033016+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546492+00:00"
     },
     {
       "key": "Cape Verde|Spain",
@@ -213,7 +213,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033005+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546480+00:00"
     },
     {
       "key": "Sweden|Tunisia",
@@ -228,7 +228,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.032998+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546474+00:00"
     },
     {
       "key": "France|Senegal",
@@ -243,7 +243,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033029+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546503+00:00"
     },
     {
       "key": "Iran|New Zealand",
@@ -258,7 +258,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033022+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546498+00:00"
     },
     {
       "key": "Iraq|Norway",
@@ -273,7 +273,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033034+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546510+00:00"
     },
     {
       "key": "Algeria|Argentina",
@@ -288,7 +288,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033040+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546516+00:00"
     },
     {
       "key": "Austria|Jordan",
@@ -303,7 +303,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033046+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546522+00:00"
     },
     {
       "key": "Croatia|England",
@@ -318,7 +318,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033058+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546534+00:00"
     },
     {
       "key": "Ghana|Panama",
@@ -333,7 +333,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033064+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546548+00:00"
     },
     {
       "key": "DR Congo|Portugal",
@@ -348,7 +348,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033052+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546529+00:00"
     },
     {
       "key": "Canada|Qatar",
@@ -363,7 +363,7 @@
       "round": "Group Stage - 2",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033087+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546574+00:00"
     },
     {
       "key": "Czechia|South Africa",
@@ -378,7 +378,7 @@
       "round": "Group Stage - 2",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033076+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546561+00:00"
     },
     {
       "key": "Bosnia & Herzegovina|Switzerland",
@@ -393,7 +393,7 @@
       "round": "Group Stage - 2",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033082+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546567+00:00"
     },
     {
       "key": "Colombia|Uzbekistan",
@@ -408,7 +408,7 @@
       "round": "Group Stage - 1",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033070+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546555+00:00"
     },
     {
       "key": "Mexico|South Korea",
@@ -423,7 +423,7 @@
       "round": "Group Stage - 2",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033093+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546580+00:00"
     },
     {
       "key": "Morocco|Scotland",
@@ -438,7 +438,7 @@
       "round": "Group Stage - 2",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033105+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546592+00:00"
     },
     {
       "key": "Australia|USA",
@@ -453,7 +453,7 @@
       "round": "Group Stage - 2",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033099+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546586+00:00"
     },
     {
       "key": "Brazil|Haiti",
@@ -468,7 +468,7 @@
       "round": "Group Stage - 2",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033111+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546599+00:00"
     },
     {
       "key": "Netherlands|Sweden",
@@ -483,7 +483,7 @@
       "round": "Group Stage - 2",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033123+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546611+00:00"
     },
     {
       "key": "Paraguay|Turkiye",
@@ -498,7 +498,7 @@
       "round": "Group Stage - 2",
       "group": null,
       "source": "api-football",
-      "syncedAt": "2026-06-20T19:11:15.033117+00:00"
+      "syncedAt": "2026-06-20T19:12:25.546605+00:00"
     }
   ]
 }
