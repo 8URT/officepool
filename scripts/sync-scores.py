@@ -35,6 +35,8 @@ TEAM_ALIASES = {
     "Turkiye": "Turkiye",
     "Czech Republic": "Czechia",
     "Czechia": "Czechia",
+    "Cape Verde Islands": "Cape Verde",
+    "Congo DR": "DR Congo",
 }
 
 API_TO_POOL = {
@@ -49,6 +51,10 @@ API_TO_POOL = {
     "Turkiye": "Turkey",
     "Czech Republic": "Czech Republic",
     "Czechia": "Czech Republic",
+    "Cape Verde Islands": "Cape Verde",
+    "Congo DR": "DR Congo",
+    "Côte d'Ivoire": "Ivory Coast",
+    "Curacao": "Curaçao",
 }
 
 LIVE_STATUSES = {"1H", "HT", "2H", "ET", "BT", "P", "LIVE", "INT"}

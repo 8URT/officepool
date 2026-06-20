@@ -56,13 +56,21 @@ const mutClockFormatter = new Intl.DateTimeFormat("en-GB", {
 });
 
 const TEAM_ALIASES = {
-  "Korea Republic": "South Korea",
-  "United States": "USA",
-  "Bosnia and Herzegovina": "Bosnia & Herzegovina",
-  Turkey: "Turkiye",
-  Türkiye: "Turkiye",
-  "Czech Republic": "Czechia",
-  Czechia: "Czechia",
+    "Korea Republic": "South Korea",
+    "South Korea": "South Korea",
+    "United States": "USA",
+    "USA": "USA",
+    "Bosnia and Herzegovina": "Bosnia & Herzegovina",
+    "Bosnia & Herzegovina": "Bosnia & Herzegovina",
+    "Turkey": "Turkiye",
+    "Türkiye": "Turkiye",
+    "Turkiye": "Turkiye",
+    "Czech Republic": "Czechia",
+    "Czechia": "Czechia",
+  "Cape Verde Islands": "Cape Verde",
+  "Congo DR": "DR Congo",
+  "Côte d'Ivoire": "Ivory Coast",
+  "Curacao": "Curaçao",
 };
 
 const els = {

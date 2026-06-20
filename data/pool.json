@@ -294,17 +294,17 @@
     },
     {
       "id": 31,
-      "day": "Sat",
-      "date": "Jun 20, 2026",
-      "time": "03:00",
+      "day": "Fri",
+      "date": "Jun 19, 2026",
+      "time": "19:00",
       "home": "United States",
       "away": "Australia"
     },
     {
       "id": 32,
-      "day": "Fri",
-      "date": "Jun 19, 2026",
-      "time": "19:00",
+      "day": "Sat",
+      "date": "Jun 20, 2026",
+      "time": "03:00",
       "home": "Turkey",
       "away": "Paraguay"
     },
@@ -384,7 +384,7 @@
       "id": 42,
       "day": "Mon",
       "date": "Jun 22, 2026",
-      "time": "20:00",
+      "time": "21:00",
       "home": "France",
       "away": "Iraq"
     },
