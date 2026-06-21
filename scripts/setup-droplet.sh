@@ -24,6 +24,11 @@ fi
 
 cd "$APP_ROOT"
 
+if [[ -n "${API_FOOTBALL_KEY:-}" ]]; then
+  printf 'API_FOOTBALL_KEY=%s\n' "$API_FOOTBALL_KEY" > .env
+  chmod 600 .env
+fi
+
 if [[ ! -f .env ]]; then
   cp .env.example .env
   echo ""
