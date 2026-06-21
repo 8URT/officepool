@@ -92,7 +92,7 @@ ssh -T git@github.com   # should say "successfully authenticated"
 bash scripts/setup-github-actions-ssh.sh
 ```
 
-GitHub secrets needed: `DROPLET_HOST`, `DROPLET_USER`, `DROPLET_SSH_KEY`, `API_FOOTBALL_KEY`.
+GitHub secrets needed for optional auto-deploy: `DROPLET_HOST`, `DROPLET_USER`, `DROPLET_SSH_KEY`, `API_FOOTBALL_KEY`. Run `bash scripts/setup-github-actions-ssh.sh` on your Mac to generate the key and print setup steps. The **Deploy to droplet** workflow is manual-only (Actions → Run workflow) so failed push notifications stop.
 
 ### First-time install
 
