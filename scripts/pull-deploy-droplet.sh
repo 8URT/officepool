@@ -1,13 +1,30 @@
 #!/usr/bin/env bash
-# Run on the droplet as root. git pull + rebuild static site.
+# Run on the droplet as root. Pull app code + rebuild static site.
+# Score JSON is updated by cron on-server and must not block deploys.
 set -euo pipefail
 
 APP_ROOT="${APP_ROOT:-/opt/officepool}"
 cd "$APP_ROOT"
 
-echo "==> Pulling latest from origin"
+echo "==> Fetching latest from origin"
 git fetch origin main
-git pull --ff-only origin main
+
+# Only update site/code files — leave live scores from cron untouched
+git checkout origin/main -- \
+  index.html \
+  favicon.svg \
+  css \
+  js \
+  data/pool.json \
+  scripts/prepare-site.sh \
+  scripts/deploy-droplet.sh \
+  scripts/pull-deploy-droplet.sh \
+  scripts/setup-droplet.sh \
+  scripts/sync-scores.py \
+  2>/dev/null || git checkout origin/main -- index.html favicon.svg css js data/pool.json scripts/
+
+# Ignore score drift so future git pull attempts stay clean
+git update-index --assume-unchanged data/scores.json data/rank-snapshots.json 2>/dev/null || true
 
 echo "==> Deploying static site"
 bash scripts/deploy-droplet.sh

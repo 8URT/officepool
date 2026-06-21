@@ -1,9 +1,7 @@
 name: Sync match scores
 
 on:
-  schedule:
-    # GitHub Actions minimum interval is 5 minutes.
-    - cron: "*/5 * * * *"
+  # Droplet cron handles live sync — run manually if needed.
   workflow_dispatch:
 
 permissions:
