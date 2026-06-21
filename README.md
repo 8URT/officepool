@@ -63,20 +63,60 @@ python3 scripts/sync-scores.py
 
 Self-hosted on the WordPress droplet. The browser loads scores from same-origin `data/scores.json`; a server cron runs `sync-scores.py` every minute (no `PUBLISH_SCORES` needed).
 
-**First-time setup** (SSH as root on the droplet):
+### SSH setup (one time)
+
+Three SSH links to configure:
+
+| Link | Purpose | Script |
+|------|---------|--------|
+| Mac → droplet | SSH in, run deploys | `bash scripts/setup-mac-droplet-ssh.sh` |
+| droplet → GitHub | `git pull` without password | `bash scripts/setup-droplet-github-ssh.sh` (on droplet) |
+| GitHub Actions → droplet | Auto-deploy on push | `bash scripts/setup-github-actions-ssh.sh` (on Mac) |
+
+**1. Mac → droplet** — run on your Mac, paste the output on the droplet:
 
 ```bash
-git clone https://github.com/8URT/officepool.git /opt/officepool
-cd /opt/officepool
-cp .env.example .env && nano .env   # API_FOOTBALL_KEY=...
-bash scripts/setup-droplet.sh
+bash scripts/setup-mac-droplet-ssh.sh
 ```
 
-**Updates** (after pushing code changes):
+**2. droplet → GitHub** — run on the droplet, add the printed key at [Deploy keys](https://github.com/8URT/officepool/settings/keys):
 
 ```bash
-cd /opt/officepool && git pull && bash scripts/deploy-droplet.sh
+cd /opt/officepool && bash scripts/setup-droplet-github-ssh.sh
+ssh -T git@github.com   # should say "successfully authenticated"
 ```
+
+**3. GitHub Actions → droplet** — run on your Mac, follow printed steps for secrets + droplet `authorized_keys`:
+
+```bash
+bash scripts/setup-github-actions-ssh.sh
+```
+
+GitHub secrets needed: `DROPLET_HOST`, `DROPLET_USER`, `DROPLET_SSH_KEY`, `API_FOOTBALL_KEY`.
+
+### First-time install
+
+```bash
+# On droplet (after Mac SSH key is added):
+export API_FOOTBALL_KEY='your_key'
+curl -fsSL https://raw.githubusercontent.com/8URT/officepool/main/scripts/setup-droplet.sh | bash
+```
+
+Or from your Mac (password SSH OK):
+
+```bash
+bash scripts/install-droplet-remote.sh
+```
+
+### Updates
+
+**On droplet:**
+
+```bash
+cd /opt/officepool && bash scripts/pull-deploy-droplet.sh
+```
+
+**From GitHub:** push to `main` — the `Deploy to droplet` workflow runs `git pull` + rebuild (when `DROPLET_SSH_KEY` secret is set).
 
 Scores update automatically via cron (`/var/log/wc-pool-sync.log`).
 
@@ -100,7 +140,11 @@ URL: **https://8urt.github.io/officepool/**
 | `.env.example` | API key template (copy to `.env`) |
 | `.github/workflows/sync-scores.yml` | Auto-sync scores every 5 min |
 | `scripts/deploy-droplet.sh` | Rebuild `/var/www/wc2026` for droplet |
+| `scripts/pull-deploy-droplet.sh` | `git pull` + deploy on droplet |
 | `scripts/setup-droplet.sh` | First-time droplet install (Apache/nginx + cron) |
+| `scripts/setup-droplet-github-ssh.sh` | droplet deploy key for GitHub pull |
+| `scripts/setup-mac-droplet-ssh.sh` | Add Mac SSH key to droplet |
+| `scripts/setup-github-actions-ssh.sh` | GHA SSH key for auto-deploy |
 
 ## Data sources
 

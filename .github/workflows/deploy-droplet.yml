@@ -11,19 +11,17 @@ on:
       - "data/pool.json"
       - "scripts/prepare-site.sh"
       - "scripts/deploy-droplet.sh"
+      - "scripts/pull-deploy-droplet.sh"
 
 jobs:
   deploy:
     if: ${{ secrets.DROPLET_SSH_KEY != '' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-
-      - name: Deploy to droplet
+      - name: Pull and deploy on droplet
         env:
           DROPLET_HOST: ${{ secrets.DROPLET_HOST }}
           DROPLET_USER: ${{ secrets.DROPLET_USER }}
-          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           SSH_KEY: ${{ secrets.DROPLET_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
@@ -32,6 +30,5 @@ jobs:
           HOST="${DROPLET_HOST:-146.190.102.191}"
           USER="${DROPLET_USER:-root}"
           ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          export API_FOOTBALL_KEY
           ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes "${USER}@${HOST}" \
-            "export API_FOOTBALL_KEY='${API_FOOTBALL_KEY}'; bash -s" < scripts/setup-droplet.sh
+            "cd /opt/officepool && bash scripts/pull-deploy-droplet.sh"

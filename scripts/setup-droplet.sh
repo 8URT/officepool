@@ -3,23 +3,37 @@
 # Run as root: bash scripts/setup-droplet.sh
 set -euo pipefail
 
-REPO_URL="${REPO_URL:-https://github.com/8URT/officepool.git}"
+REPO_URL="${REPO_URL:-}"
 APP_ROOT="${APP_ROOT:-/opt/officepool}"
 WEB_ROOT="${WEB_ROOT:-/var/www/wc2026}"
 BASE_PATH="${BASE_PATH:-/wc2026}"
 LOG_FILE="${LOG_FILE:-/var/log/wc-pool-sync.log}"
 CRON_MARKER="# wc-pool-sync"
+DEPLOY_KEY_PATH="${DEPLOY_KEY_PATH:-/root/.ssh/officepool_github}"
+
+if [[ -z "$REPO_URL" ]]; then
+  if [[ -f "$DEPLOY_KEY_PATH" ]]; then
+    REPO_URL="git@github.com:8URT/officepool.git"
+  else
+    REPO_URL="https://github.com/8URT/officepool.git"
+  fi
+fi
 
 echo "==> Installing packages"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y -qq git python3 curl
 
-echo "==> Cloning or updating app at ${APP_ROOT}"
+echo "==> Cloning or updating app at ${APP_ROOT} (${REPO_URL})"
 if [[ -d "${APP_ROOT}/.git" ]]; then
   git -C "$APP_ROOT" pull --ff-only
 else
   git clone "$REPO_URL" "$APP_ROOT"
+fi
+
+# Offer GitHub SSH setup hint if still on HTTPS
+if [[ -f "${APP_ROOT}/.git/config" ]] && grep -q 'https://github.com' "${APP_ROOT}/.git/config" 2>/dev/null; then
+  echo "    Tip: run bash scripts/setup-droplet-github-ssh.sh for SSH git pull"
 fi
 
 cd "$APP_ROOT"
