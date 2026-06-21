@@ -48,7 +48,7 @@ Do **not** run `./scripts/watch-scores.sh` or set `PUBLISH_SCORES=1` — that pu
 
 Finished and live scores live in **`data/scores.json`** on the droplet. Kickoff snapshots in **`data/rank-snapshots.json`**.
 
-**Production:** droplet cron runs `sync-scores.py` every minute (`/var/log/wc-pool-sync.log`).
+**Production:** droplet cron runs `sync-scores.py` every minute. API-Football is only called within **±2 hours of kickoff** (or while a match is live); openfootball still updates finished scores for free.
 
 **GitHub repo:** score files in git are not updated automatically — the droplet is the source of truth.
 

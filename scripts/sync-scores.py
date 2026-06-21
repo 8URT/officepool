@@ -7,7 +7,7 @@ import json
 import os
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,6 +59,13 @@ API_TO_POOL = {
 
 LIVE_STATUSES = {"1H", "HT", "2H", "ET", "BT", "P", "LIVE", "INT"}
 FINISHED_STATUSES = {"FT", "AET", "PEN"}
+MATCH_WINDOW_BEFORE = timedelta(hours=2)
+MATCH_WINDOW_AFTER = timedelta(hours=2)
+
+MONTH_NAMES = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+]
 
 
 def load_dotenv() -> None:
@@ -121,6 +128,42 @@ def fetch_json(url: str, headers: dict | None = None) -> dict:
     request = urllib.request.Request(url, headers=headers or {})
     with urllib.request.urlopen(request, timeout=30) as response:
         return json.load(response)
+
+
+def parse_pool_utc(match: dict) -> datetime | None:
+    """Kickoff in pool.json is stored as UTC."""
+    date_str = match.get("date")
+    time_str = match.get("time") or "00:00"
+    if not date_str:
+        return None
+
+    if isinstance(date_str, str) and date_str[:4].isdigit() and "-" in date_str:
+        year, month, day = [int(part) for part in date_str.split("-")]
+    else:
+        cleaned = str(date_str).replace(",", "").strip().split()
+        if len(cleaned) < 3:
+            return None
+        month = MONTH_NAMES.index(cleaned[0][:3]) + 1
+        day = int(cleaned[1])
+        year = int(cleaned[2])
+
+    hour, minute = [int(part) for part in str(time_str).split(":")]
+    return datetime(year, month, day, hour, minute, tzinfo=timezone.utc)
+
+
+def should_fetch_api_football(pool: dict, existing: dict[str, dict]) -> bool:
+    """Call API-Football only near kickoff or while a match is still live."""
+    if any(match.get("isLive") for match in existing.values()):
+        return True
+
+    now = datetime.now(timezone.utc)
+    for match in pool.get("matches") or []:
+        kickoff = parse_pool_utc(match)
+        if not kickoff:
+            continue
+        if kickoff - MATCH_WINDOW_BEFORE <= now <= kickoff + MATCH_WINDOW_AFTER:
+            return True
+    return False
 
 
 def fetch_openfootball() -> dict[str, dict]:
@@ -427,7 +470,12 @@ def main() -> None:
     pool = load_pool()
     existing = load_existing()
     openfootball = fetch_openfootball()
-    api_football = fetch_api_football(pool)
+
+    if should_fetch_api_football(pool, existing):
+        api_football = fetch_api_football(pool)
+    else:
+        api_football = {}
+        print("API-Football skipped — outside match window (kickoff ±2h, no live matches)")
 
     # Priority: API-Football (live + FT) > openfootball FT > existing stored
     merged = merge_maps(existing, openfootball, api_football)
