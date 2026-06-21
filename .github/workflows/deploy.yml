@@ -26,12 +26,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Sync latest scores
-        env:
-          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-        run: python3 scripts/sync-scores.py
-
-      - name: Prepare static site
+      - name: Prepare static site (redirect only)
         run: bash scripts/prepare-site.sh _site
 
       - name: Setup Pages

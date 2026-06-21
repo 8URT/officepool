@@ -17,47 +17,40 @@ Mobile-first live leaderboard for your office football pool. Predictions and fix
 
 Each participant gets **1 point per exact score** prediction. Correct winner alone does not count.
 
-## Running locally
+## Running locally (dev only)
+
+For testing UI changes — **do not sync scores locally** during matches; the droplet handles live scores.
 
 ```bash
 cp .env.example .env
-# Edit .env and add your API-Football key (direct subscription, api-sports.io)
+# API key optional for local UI work; scores come from committed data/pool.json + data/scores.json
 
-python3 scripts/sync-scores.py
 python3 -m http.server 8080
 ```
 
 Open **http://localhost:8080**
 
-### Live match days
-
-Re-sync scores every 60 seconds:
-
-```bash
-./scripts/watch-scores.sh 60
-```
-
-To keep **GitHub / the online site** in sync while you watch locally, add `PUBLISH_SCORES=1` to `.env` (or run `PUBLISH_SCORES=1 ./scripts/watch-scores.sh 60`). That pushes `data/scores.json` after each sync.
-
-> GitHub’s scheduled Actions often run every 1–4 hours, not every 5 minutes. Local publish during matches is the reliable way to keep the live site current.
-
-## API key (keep private)
-
-- **Local:** put your key in `.env` as `API_FOOTBALL_KEY=...` (never commit `.env`)
-- **GitHub (when you push):** add repository secret `API_FOOTBALL_KEY` under Settings → Secrets → Actions
-- The browser never calls API-Football directly — only `scripts/sync-scores.py` uses the key
-
-## Scores (the only thing that updates)
-
-Finished and live scores are saved to **`data/scores.json`**. Kickoff rank snapshots go to **`data/rank-snapshots.json`**.
-
-**Automatic:** GitHub Actions syncs scores when scheduled (often every 1–4 hours in practice, not every 5 minutes).
-
-**Manual sync:**
+To test score sync logic once (not for production):
 
 ```bash
 python3 scripts/sync-scores.py
 ```
+
+Do **not** run `./scripts/watch-scores.sh` or set `PUBLISH_SCORES=1` — that pushes to GitHub and duplicates the droplet cron.
+
+## API key (keep private)
+
+- **Droplet (production):** `/opt/officepool/.env` — used by cron every minute
+- **Local dev:** optional in `.env` for one-off `sync-scores.py` tests only
+- The browser never calls API-Football directly
+
+## Scores
+
+Finished and live scores live in **`data/scores.json`** on the droplet. Kickoff snapshots in **`data/rank-snapshots.json`**.
+
+**Production:** droplet cron runs `sync-scores.py` every minute (`/var/log/wc-pool-sync.log`).
+
+**GitHub repo:** score files in git are not updated automatically — the droplet is the source of truth.
 
 ## Deploy to droplet (8urt.net/wc2026)
 
@@ -122,11 +115,11 @@ Scores update automatically via cron (`/var/log/wc-pool-sync.log`).
 
 ## Deploy (GitHub Pages)
 
-1. Add `API_FOOTBALL_KEY` secret on GitHub
-2. **Settings → Pages → Source:** GitHub Actions
-3. Push to `main` — deploy workflow syncs scores and publishes the site
+GitHub Pages only hosts the **redirect** to https://8urt.net/wc2026/. No score sync on GitHub.
 
-URL: **https://8urt.github.io/officepool/**
+Manual deploy: **Actions → Deploy to GitHub Pages → Run workflow**
+
+URL: **https://8urt.github.io/officepool/** (redirects to droplet)
 
 ## Files
 
@@ -136,9 +129,8 @@ URL: **https://8urt.github.io/officepool/**
 | `data/scores.json` | Stored match results (FT + live) |
 | `data/rank-snapshots.json` | Rank at kickoff per live match |
 | `scripts/sync-scores.py` | API-Football + openfootball → data files |
-| `scripts/watch-scores.sh` | Local 60s sync loop |
+| `scripts/watch-scores.sh` | Local dev loop (do not use in production) |
 | `.env.example` | API key template (copy to `.env`) |
-| `.github/workflows/sync-scores.yml` | Auto-sync scores every 5 min |
 | `scripts/deploy-droplet.sh` | Rebuild `/var/www/wc2026` for droplet |
 | `scripts/pull-deploy-droplet.sh` | `git pull` + deploy on droplet |
 | `scripts/setup-droplet.sh` | First-time droplet install (Apache/nginx + cron) |
