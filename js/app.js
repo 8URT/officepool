@@ -1002,7 +1002,7 @@ async function fetchJson(url, { timeoutMs = 15000, headers = {} } = {}) {
   }
 }
 
-async function fetchGithubDataFile(path) {
+async function fetchGithubDataFile(path, { manual = false } = {}) {
   if (IS_LOCAL) {
     return fetchJson(path.startsWith("data/") ? path : `data/${path}`);
   }
@@ -1018,6 +1018,60 @@ async function fetchGithubDataFile(path) {
   }
 }
 
+async function fetchStoredScores({ manual = false } = {}) {
+  if (IS_LOCAL) {
+    return fetchJson(STORED_SCORES_URL);
+  }
+
+  const sources = [
+    {
+      name: "github-api",
+      fetch: () =>
+        fetchJson(`https://api.github.com/repos/${GITHUB_REPO}/contents/data/scores.json?ref=main`, {
+          headers: { Accept: "application/vnd.github.raw+json" },
+        }),
+    },
+    {
+      name: "github-raw",
+      fetch: () => fetchJson(`${GITHUB_RAW_BASE}/data/scores.json`),
+    },
+    {
+      name: "jsdelivr",
+      fetch: () => fetchJson(`https://cdn.jsdelivr.net/gh/${GITHUB_REPO}@main/data/scores.json`),
+    },
+  ];
+
+  if (manual) {
+    sources.push({
+      name: "github-commit",
+      fetch: async () => {
+        const commits = await fetchJson(
+          `https://api.github.com/repos/${GITHUB_REPO}/commits?path=data/scores.json&per_page=1`
+        );
+        const sha = commits?.[0]?.sha;
+        if (!sha) throw new Error("No scores commit found");
+        return fetchJson(`https://raw.githubusercontent.com/${GITHUB_REPO}/${sha}/data/scores.json`);
+      },
+    });
+  }
+
+  const results = await Promise.allSettled(sources.map((source) => source.fetch()));
+  const candidates = results
+    .map((result, index) => ({ result, source: sources[index].name }))
+    .filter((entry) => entry.result.status === "fulfilled" && entry.result.value?.updatedAt)
+    .map((entry) => entry.result.value);
+
+  if (!candidates.length) {
+    const error = results.find((result) => result.status === "rejected");
+    throw error?.reason || new Error("No score sources available");
+  }
+
+  candidates.sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  );
+  return candidates[0];
+}
+
 function formatLatestResult(match) {
   if (!match?.result) return "";
   return `${match.home} ${match.result.scoreHome}–${match.result.scoreAway} ${match.away}`;
@@ -1030,6 +1084,7 @@ function setPullLoading(loading) {
   }
   if (els.refreshBtn) {
     els.refreshBtn.classList.toggle("spinning", loading);
+    els.refreshBtn.disabled = loading;
   }
 }
 
@@ -1061,7 +1116,7 @@ async function refresh({ manual = false } = {}) {
     }
 
     try {
-      const storedData = await fetchGithubDataFile("data/scores.json");
+      const storedData = await fetchStoredScores({ manual });
       storedScoresMeta = storedData;
       scoreMap = mergeScoreMaps(scoreMap, buildScoreMapFromStored(storedData));
       if (scoreMap.size) liveSource = storedData.source ? "stored" : liveSource;
@@ -1073,8 +1128,10 @@ async function refresh({ manual = false } = {}) {
 
     try {
       const scoresVersion = storedScoresMeta?.updatedAt || null;
-      if (!rankSnapshots || scoresVersion !== lastSnapshotsScoresVersion) {
-        rankSnapshots = await fetchGithubDataFile("data/rank-snapshots.json");
+      const shouldFetchSnapshots =
+        manual || !rankSnapshots || scoresVersion !== lastSnapshotsScoresVersion;
+      if (shouldFetchSnapshots) {
+        rankSnapshots = await fetchGithubDataFile("data/rank-snapshots.json", { manual });
         lastSnapshotsScoresVersion = scoresVersion;
       }
     } catch (error) {
@@ -1173,7 +1230,15 @@ async function refresh({ manual = false } = {}) {
       } else if (liveFetchFailed && storedFetchFailed) {
         showToast("Could not pull results — check your connection");
       } else if (hasLive) {
-        showToast(`Live · ${liveMatches.length} match(es) in play`);
+        const live = liveMatches[0];
+        const result = live?.result;
+        const scoreLabel = result
+          ? `${live.home} ${result.scoreHome}–${result.scoreAway} ${live.away}`
+          : `${live.home} vs ${live.away}`;
+        const minuteLabel = result ? formatLiveMinute(result) : "Live";
+        showToast(`Live · ${scoreLabel} · ${minuteLabel}`);
+      } else if (manual && storedScoresMeta?.updatedAt) {
+        showToast(`Scores refreshed · ${formatTime(new Date(storedScoresMeta.updatedAt))}`);
       } else {
         showToast(`${finishedMatches.length} results · no new scores yet`);
       }
