@@ -2,7 +2,7 @@
 
 Mobile-first live leaderboard for your office football pool. Predictions and fixtures live in `data/pool.json` (fixed for the tournament). Match results are stored in `data/scores.json` and synced from openfootball + API-Football (live).
 
-**Live site:** https://8urt.net/wc2026/ (primary) · https://8urt.github.io/officepool/ (archive)
+**Live site:** https://8urt.net/wc2026/ (primary) · https://8urt.github.io/officepool/ (redirects to primary)
 
 ## What you get
 
