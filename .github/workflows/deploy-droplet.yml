@@ -1,0 +1,37 @@
+name: Deploy to droplet
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "css/**"
+      - "js/**"
+      - "data/pool.json"
+      - "scripts/prepare-site.sh"
+      - "scripts/deploy-droplet.sh"
+
+jobs:
+  deploy:
+    if: ${{ secrets.DROPLET_SSH_KEY != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Deploy to droplet
+        env:
+          DROPLET_HOST: ${{ secrets.DROPLET_HOST }}
+          DROPLET_USER: ${{ secrets.DROPLET_USER }}
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          SSH_KEY: ${{ secrets.DROPLET_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          HOST="${DROPLET_HOST:-146.190.102.191}"
+          USER="${DROPLET_USER:-root}"
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          export API_FOOTBALL_KEY
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes "${USER}@${HOST}" \
+            "export API_FOOTBALL_KEY='${API_FOOTBALL_KEY}'; bash -s" < scripts/setup-droplet.sh
