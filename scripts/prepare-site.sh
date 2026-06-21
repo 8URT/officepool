@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${1:-$ROOT/_site}"
+BASE_PATH="${BASE_PATH:-}"
 
 rm -rf "$OUT"
 mkdir -p "$OUT"
@@ -17,4 +18,13 @@ else
   sed -i "s|js/app.js|js/app.js?v=${ASSET_VERSION}|" "$OUT/index.html"
 fi
 
-echo "Site prepared at $OUT (app.js?v=${ASSET_VERSION})"
+if [[ -n "$BASE_PATH" ]]; then
+  BASE_HREF="${BASE_PATH%/}/"
+  if [[ "$OSTYPE" == darwin* ]]; then
+    sed -i '' "s|<head>|<head>\\n  <base href=\"${BASE_HREF}\">|" "$OUT/index.html"
+  else
+    sed -i "s|<head>|<head>\n  <base href=\"${BASE_HREF}\">|" "$OUT/index.html"
+  fi
+fi
+
+echo "Site prepared at $OUT (app.js?v=${ASSET_VERSION}${BASE_PATH:+, base=${BASE_PATH}})"

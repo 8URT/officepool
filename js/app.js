@@ -5,8 +5,12 @@ const IS_LOCAL =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1" ||
   window.location.protocol === "file:";
-const STORED_SCORES_URL = IS_LOCAL ? "data/scores.json" : `${GITHUB_RAW_BASE}/data/scores.json`;
-const SNAPSHOTS_URL = IS_LOCAL ? "data/rank-snapshots.json" : `${GITHUB_RAW_BASE}/data/rank-snapshots.json`;
+const IS_SELF_HOSTED =
+  window.location.hostname === "8urt.net" ||
+  window.location.hostname.endsWith(".8urt.net");
+const USE_LOCAL_DATA = IS_LOCAL || IS_SELF_HOSTED;
+const STORED_SCORES_URL = USE_LOCAL_DATA ? "data/scores.json" : `${GITHUB_RAW_BASE}/data/scores.json`;
+const SNAPSHOTS_URL = USE_LOCAL_DATA ? "data/rank-snapshots.json" : `${GITHUB_RAW_BASE}/data/rank-snapshots.json`;
 const SCORES_URL =
   "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json";
 const REFRESH_MS = 2 * 60 * 1000;
@@ -1003,7 +1007,7 @@ async function fetchJson(url, { timeoutMs = 15000, headers = {} } = {}) {
 }
 
 async function fetchGithubDataFile(path, { manual = false } = {}) {
-  if (IS_LOCAL) {
+  if (USE_LOCAL_DATA) {
     return fetchJson(path.startsWith("data/") ? path : `data/${path}`);
   }
 
@@ -1019,7 +1023,7 @@ async function fetchGithubDataFile(path, { manual = false } = {}) {
 }
 
 async function fetchStoredScores({ manual = false } = {}) {
-  if (IS_LOCAL) {
+  if (USE_LOCAL_DATA) {
     return fetchJson(STORED_SCORES_URL);
   }
 
@@ -1203,7 +1207,7 @@ async function refresh({ manual = false } = {}) {
       ? Date.now() - new Date(storedScoresMeta.updatedAt).getTime()
       : null;
     const scoresStale =
-      !IS_LOCAL && scoresUpdatedMs != null && scoresUpdatedMs > 15 * 60 * 1000;
+      !USE_LOCAL_DATA && scoresUpdatedMs != null && scoresUpdatedMs > 15 * 60 * 1000;
     const staleLabel = scoresStale ? " · scores updating slowly" : "";
 
     setStatus({

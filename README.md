@@ -2,7 +2,7 @@
 
 Mobile-first live leaderboard for your office football pool. Predictions and fixtures live in `data/pool.json` (fixed for the tournament). Match results are stored in `data/scores.json` and synced from openfootball + API-Football (live).
 
-**Live site:** https://8urt.github.io/officepool/
+**Live site:** https://8urt.net/wc2026/ (primary) · https://8urt.github.io/officepool/ (archive)
 
 ## What you get
 
@@ -59,7 +59,28 @@ Finished and live scores are saved to **`data/scores.json`**. Kickoff rank snaps
 python3 scripts/sync-scores.py
 ```
 
-## Deploy (when ready)
+## Deploy to droplet (8urt.net/wc2026)
+
+Self-hosted on the WordPress droplet. The browser loads scores from same-origin `data/scores.json`; a server cron runs `sync-scores.py` every minute (no `PUBLISH_SCORES` needed).
+
+**First-time setup** (SSH as root on the droplet):
+
+```bash
+git clone https://github.com/8URT/officepool.git /opt/officepool
+cd /opt/officepool
+cp .env.example .env && nano .env   # API_FOOTBALL_KEY=...
+bash scripts/setup-droplet.sh
+```
+
+**Updates** (after pushing code changes):
+
+```bash
+cd /opt/officepool && git pull && bash scripts/deploy-droplet.sh
+```
+
+Scores update automatically via cron (`/var/log/wc-pool-sync.log`).
+
+## Deploy (GitHub Pages)
 
 1. Add `API_FOOTBALL_KEY` secret on GitHub
 2. **Settings → Pages → Source:** GitHub Actions
@@ -78,7 +99,8 @@ URL: **https://8urt.github.io/officepool/**
 | `scripts/watch-scores.sh` | Local 60s sync loop |
 | `.env.example` | API key template (copy to `.env`) |
 | `.github/workflows/sync-scores.yml` | Auto-sync scores every 5 min |
-| `.github/workflows/deploy.yml` | Deploy to GitHub Pages |
+| `scripts/deploy-droplet.sh` | Rebuild `/var/www/wc2026` for droplet |
+| `scripts/setup-droplet.sh` | First-time droplet install (Apache/nginx + cron) |
 
 ## Data sources
 
