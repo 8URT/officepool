@@ -64,7 +64,7 @@ Three SSH links to configure:
 |------|---------|--------|
 | Mac → droplet | SSH in, run deploys | `bash scripts/setup-mac-droplet-ssh.sh` |
 | droplet → GitHub | `git pull` without password | `bash scripts/setup-droplet-github-ssh.sh` (on droplet) |
-| GitHub Actions → droplet | Auto-deploy on push | `bash scripts/setup-github-actions-ssh.sh` (on Mac) |
+| GitHub Actions → droplet | Optional manual deploy from GitHub UI | `bash scripts/setup-github-actions-ssh.sh` (on Mac) |
 
 **1. Mac → droplet** — run on your Mac, paste the output on the droplet:
 
@@ -101,15 +101,21 @@ Or from your Mac (password SSH OK):
 bash scripts/install-droplet-remote.sh
 ```
 
-### Updates
+### Updates (you run these — not automated by the assistant)
 
-**On droplet:**
+**On the droplet** (usual way after code changes):
 
 ```bash
 cd /opt/officepool && bash scripts/pull-deploy-droplet.sh
 ```
 
-**From GitHub:** push to `main` — the `Deploy to droplet` workflow runs `git pull` + rebuild (when `DROPLET_SSH_KEY` secret is set).
+**Optional — GitHub Actions** (only if you set up `DROPLET_SSH_KEY`):
+
+1. Open https://github.com/8URT/officepool/actions
+2. Choose **Deploy to droplet**
+3. Click **Run workflow**
+
+This workflow is manual-only; pushing to `main` does not auto-deploy.
 
 Scores update automatically via cron (`/var/log/wc-pool-sync.log`).
 
@@ -117,7 +123,7 @@ Scores update automatically via cron (`/var/log/wc-pool-sync.log`).
 
 GitHub Pages only hosts the **redirect** to https://8urt.net/wc2026/. No score sync on GitHub.
 
-Manual deploy: **Actions → Deploy to GitHub Pages → Run workflow**
+Manual deploy (you, in the GitHub web UI): **Actions → Deploy to GitHub Pages → Run workflow**
 
 URL: **https://8urt.github.io/officepool/** (redirects to droplet)
 
