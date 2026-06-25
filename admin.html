@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <title>WC Pool — Admin</title>
+  <script>
+    (function () {
+      if (localStorage.getItem("wc-pool-theme") !== "light") {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700;9..40,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="hero">
+      <div class="hero-top">
+        <div class="hero-pills">
+          <span class="badge">Admin</span>
+          <a class="badge badge-btn badge-blue" href="index.html">← Back to pool</a>
+        </div>
+      </div>
+      <h1>Admin <span class="accent">panel</span></h1>
+      <p class="hero-sub" id="adminWho">Checking access…</p>
+    </header>
+
+    <main id="adminMain" hidden>
+      <div class="auth-nav" style="margin-bottom:1rem;">
+        <button type="button" class="auth-nav-tab active" data-tab="users">Users</button>
+        <button type="button" class="auth-nav-tab" data-tab="fixtures">Fixtures</button>
+        <button type="button" class="auth-nav-tab" data-tab="audit">Audit log</button>
+        <button type="button" class="auth-nav-tab logout" id="adminLogout">Log out</button>
+      </div>
+
+      <section class="panel" id="tab-users">
+        <div class="panel-head"><h2>Users</h2></div>
+        <p class="auth-hint">Reset a password back to <strong>fifa2026</strong> (forces a change on next login).</p>
+        <div id="usersList"><p class="auth-hint">Loading…</p></div>
+      </section>
+
+      <section class="panel" id="tab-fixtures" hidden>
+        <div class="panel-head"><h2>Knockout fixtures</h2></div>
+        <form class="auth-form" id="fixtureForm" style="margin-bottom:1rem;">
+          <input type="hidden" name="id">
+          <label>Stage
+            <select name="stage" required>
+              <option value="R32">Round of 32</option>
+              <option value="R16">Round of 16</option>
+              <option value="QF">Quarter-finals</option>
+              <option value="SF">Semi-finals</option>
+              <option value="THIRD">Third place</option>
+              <option value="FINAL">Final</option>
+            </select>
+          </label>
+          <label>Home team<input name="home" required></label>
+          <label>Away team<input name="away" required></label>
+          <label>Kickoff (UTC)<input name="kickoff_utc" type="datetime-local" required></label>
+          <label class="auth-check"><input name="published" type="checkbox"> Published (visible to users)</label>
+          <button type="submit" class="auth-submit">Save fixture</button>
+          <p class="auth-msg" data-msg="fixture"></p>
+        </form>
+        <div class="auth-nav" style="margin-bottom:0.75rem;">
+          <strong style="align-self:center;font-size:0.85rem;">Publish whole stage:</strong>
+          <button type="button" class="auth-nav-tab" data-publish="R32">R32</button>
+          <button type="button" class="auth-nav-tab" data-publish="R16">R16</button>
+          <button type="button" class="auth-nav-tab" data-publish="QF">QF</button>
+          <button type="button" class="auth-nav-tab" data-publish="SF">SF</button>
+          <button type="button" class="auth-nav-tab" data-publish="FINAL">Final</button>
+        </div>
+        <div id="fixturesList"><p class="auth-hint">Loading…</p></div>
+      </section>
+
+      <section class="panel" id="tab-audit" hidden>
+        <div class="panel-head"><h2>Audit log</h2></div>
+        <div id="auditList"><p class="auth-hint">Loading…</p></div>
+      </section>
+    </main>
+
+    <main id="adminDenied" hidden>
+      <section class="panel">
+        <p class="auth-hint" id="deniedMsg">You must be logged in as an admin to view this page.</p>
+        <p><a class="auth-link" href="index.html">Go to the pool and log in</a></p>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="js/admin.js" type="module"></script>
+</body>
+</html>

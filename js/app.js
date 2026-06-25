@@ -11,6 +11,9 @@ const IS_SELF_HOSTED =
 const USE_LOCAL_DATA = IS_LOCAL || IS_SELF_HOSTED;
 const STORED_SCORES_URL = USE_LOCAL_DATA ? "data/scores.json" : `${GITHUB_RAW_BASE}/data/scores.json`;
 const SNAPSHOTS_URL = USE_LOCAL_DATA ? "data/rank-snapshots.json" : `${GITHUB_RAW_BASE}/data/rank-snapshots.json`;
+// Knockout phase: backend API base (reverse-proxied) and the public export file.
+const API_BASE = "api";
+const KNOCKOUT_PATH = "data/knockout.json";
 const SCORES_URL =
   "https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json";
 const REFRESH_MS = 2 * 60 * 1000;
@@ -113,6 +116,8 @@ const els = {
 };
 
 let poolData = null;
+let basePool = null;
+let knockoutData = { matches: [], scores: [], predictions: {} };
 let lastSnapshotsScoresVersion = null;
 let storedScoresMeta = null;
 let rankSnapshots = null;
@@ -1092,6 +1097,54 @@ function setPullLoading(loading) {
   }
 }
 
+async function fetchKnockoutData({ manual = false } = {}) {
+  try {
+    const data = USE_LOCAL_DATA
+      ? await fetchJson(KNOCKOUT_PATH)
+      : await fetchGithubDataFile(KNOCKOUT_PATH, { manual });
+    return {
+      matches: Array.isArray(data?.matches) ? data.matches : [],
+      scores: Array.isArray(data?.scores) ? data.scores : [],
+      predictions: data?.predictions && typeof data.predictions === "object" ? data.predictions : {},
+      stageLabels: data?.stageLabels || {},
+    };
+  } catch (error) {
+    console.warn("Knockout data unavailable.", error);
+    return { matches: [], scores: [], predictions: {}, stageLabels: {} };
+  }
+}
+
+// Build a combined pool (group + knockout) so the existing ranking engine treats
+// knockout fixtures, predictions, and results exactly like group-stage ones.
+function mergePoolWithKnockout(base, ko) {
+  if (!base) return base;
+  const koMatches = (ko?.matches || []).map((m) => ({
+    id: m.id,
+    home: m.home,
+    away: m.away,
+    date: m.date,
+    time: m.time,
+    stage: m.stage,
+    round: m.stageLabel || m.stage,
+    group: m.stageLabel || m.stage,
+    isKnockout: true,
+    kickoffUtc: m.kickoffUtc,
+  }));
+
+  const predictions = {};
+  for (const name of base.participants) {
+    const groupPicks = base.predictions?.[name] || {};
+    const koPicks = ko?.predictions?.[name] || {};
+    predictions[name] = { ...groupPicks, ...koPicks };
+  }
+
+  return {
+    ...base,
+    matches: [...base.matches, ...koMatches],
+    predictions,
+  };
+}
+
 async function refresh({ manual = false } = {}) {
   const prevFinishedCount = appState.finishedMatches?.length ?? 0;
   const prevFinishedKeys = new Set(
@@ -1100,9 +1153,12 @@ async function refresh({ manual = false } = {}) {
   setPullLoading(true);
 
   try {
-    if (!poolData) {
-      poolData = await fetchJson(POOL_URL);
+    if (!basePool) {
+      basePool = await fetchJson(POOL_URL);
     }
+
+    knockoutData = await fetchKnockoutData({ manual });
+    poolData = mergePoolWithKnockout(basePool, knockoutData);
 
     let scoreMap = new Map();
     let liveSource = "none";
@@ -1128,6 +1184,13 @@ async function refresh({ manual = false } = {}) {
       storedFetchFailed = true;
       console.warn("Stored scores unavailable.", error);
       if (liveSource !== "openfootball") storedScoresMeta = null;
+    }
+
+    if (knockoutData.scores.length) {
+      scoreMap = mergeScoreMaps(
+        scoreMap,
+        buildScoreMapFromStored({ matches: knockoutData.scores })
+      );
     }
 
     try {
@@ -1290,6 +1353,9 @@ function startAutoRefresh() {
 
 els.refreshBtn.addEventListener("click", () => refresh({ manual: true }));
 els.pullResultsBtn?.addEventListener("click", () => refresh({ manual: true }));
+
+// Let the auth/knockout UI trigger a leaderboard refresh after saving picks.
+window.wcRefresh = () => refresh({ manual: true });
 
 els.virtualTab?.addEventListener("click", () => setRankingTab("virtual"));
 els.liveTab?.addEventListener("click", () => setRankingTab("live"));

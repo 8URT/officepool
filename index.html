@@ -41,6 +41,7 @@
           <button type="button" class="badge badge-btn badge-black" id="resultsPill">Results</button>
         </div>
         <div class="hero-actions">
+          <button class="auth-btn" id="authBtn" type="button">Log in</button>
           <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch to light mode">
             <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -151,6 +152,18 @@
     </div>
   </div>
 
+  <div class="auth-modal" id="authModal" hidden>
+    <div class="auth-modal-backdrop" id="authModalBackdrop"></div>
+    <div class="auth-modal-panel" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+      <div class="auth-modal-head">
+        <h2 id="authModalTitle">Log in</h2>
+        <button class="auth-modal-close" id="authModalClose" aria-label="Close">✕</button>
+      </div>
+      <div class="auth-modal-body" id="authModalBody"></div>
+    </div>
+  </div>
+
   <script src="js/app.js" type="module"></script>
+  <script src="js/auth.js" type="module"></script>
 </body>
 </html>

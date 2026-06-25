@@ -1,0 +1,16 @@
+[Unit]
+Description=Office Pool Knockout API (FastAPI/uvicorn)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/officepool
+EnvironmentFile=/opt/officepool/.env
+ExecStart=/opt/officepool/.venv/bin/uvicorn backend.app:app --host 127.0.0.1 --port 8001 --workers 1
+Restart=on-failure
+RestartSec=3
+# Low-memory droplet: keep the footprint small.
+MemoryMax=200M
+
+[Install]
+WantedBy=multi-user.target

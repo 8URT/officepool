@@ -5,3 +5,9 @@ World Cup 2026.xlsx
 .env
 .env.local
 .publish-lock/
+.venv/
+__pycache__/
+*.pyc
+data/app.db
+data/app.db-*
+data/knockout.json

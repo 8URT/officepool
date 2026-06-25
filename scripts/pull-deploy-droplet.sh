@@ -12,19 +12,18 @@ git fetch origin main
 # Only update site/code files — leave live scores from cron untouched
 git checkout origin/main -- \
   index.html \
+  admin.html \
   favicon.svg \
   css \
   js \
+  backend \
   data/pool.json \
-  scripts/prepare-site.sh \
-  scripts/deploy-droplet.sh \
-  scripts/pull-deploy-droplet.sh \
-  scripts/setup-droplet.sh \
-  scripts/sync-scores.py \
-  2>/dev/null || git checkout origin/main -- index.html favicon.svg css js data/pool.json scripts/
+  scripts \
+  2>/dev/null || git checkout origin/main -- index.html favicon.svg css js backend data/pool.json scripts/
 
 # Ignore score drift so future git pull attempts stay clean
 git update-index --assume-unchanged data/scores.json data/rank-snapshots.json 2>/dev/null || true
+git update-index --assume-unchanged data/knockout.json 2>/dev/null || true
 
 echo "==> Deploying static site"
 bash scripts/deploy-droplet.sh
