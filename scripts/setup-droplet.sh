@@ -68,6 +68,13 @@ if ! grep -q '^ADMIN_USERNAME=' .env; then
   printf 'ADMIN_USERNAME=%s\n' "${ADMIN_USERNAME:-admin}" >> .env
   echo "    Set ADMIN_USERNAME=${ADMIN_USERNAME:-admin}"
 fi
+# Session cookie must be scoped to this site's base path, else the browser
+# won't send it back to /<base>/api/ and logins won't persist.
+if grep -q '^COOKIE_PATH=' .env; then
+  sed -i "s|^COOKIE_PATH=.*|COOKIE_PATH=${BASE_PATH}|" .env
+else
+  printf 'COOKIE_PATH=%s\n' "$BASE_PATH" >> .env
+fi
 chmod 600 .env
 
 # --- Swapfile (insurance on the 1 GB droplet) --------------------------------
