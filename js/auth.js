@@ -74,6 +74,63 @@ function questionOptions(selected = "") {
     .join("");
 }
 
+const DOB_MONTHS = [
+  ["01", "Jan"],
+  ["02", "Feb"],
+  ["03", "Mar"],
+  ["04", "Apr"],
+  ["05", "May"],
+  ["06", "Jun"],
+  ["07", "Jul"],
+  ["08", "Aug"],
+  ["09", "Sep"],
+  ["10", "Oct"],
+  ["11", "Nov"],
+  ["12", "Dec"],
+];
+
+function dobFieldHtml() {
+  const currentYear = new Date().getFullYear();
+  const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
+  const years = Array.from({ length: currentYear - 1939 }, (_, i) => currentYear - i);
+  return `
+    <label class="dob-label">Date of birth
+      <div class="dob-fields">
+        <select name="dob_day" required aria-label="Day">
+          <option value="" disabled selected>Day</option>
+          ${days.map((d) => `<option value="${d}">${parseInt(d, 10)}</option>`).join("")}
+        </select>
+        <select name="dob_month" required aria-label="Month">
+          <option value="" disabled selected>Month</option>
+          ${DOB_MONTHS.map(([v, label]) => `<option value="${v}">${label}</option>`).join("")}
+        </select>
+        <select name="dob_year" required aria-label="Year">
+          <option value="" disabled selected>Year</option>
+          ${years.map((y) => `<option value="${y}">${y}</option>`).join("")}
+        </select>
+      </div>
+    </label>`;
+}
+
+function readDobFromForm(fd) {
+  const day = fd.get("dob_day");
+  const month = fd.get("dob_month");
+  const year = fd.get("dob_year");
+  if (!day || !month || !year) {
+    throw new Error("Enter your full date of birth.");
+  }
+  const iso = `${year}-${month}-${String(day).padStart(2, "0")}`;
+  const parsed = new Date(`${iso}T12:00:00Z`);
+  if (
+    parsed.getUTCFullYear() !== Number(year) ||
+    parsed.getUTCMonth() + 1 !== Number(month) ||
+    parsed.getUTCDate() !== Number(day)
+  ) {
+    throw new Error("That date of birth is not valid.");
+  }
+  return iso;
+}
+
 // --------------------------------------------------------------------------- //
 // Views
 // --------------------------------------------------------------------------- //
@@ -116,7 +173,7 @@ function showFirstSetup() {
     <form class="auth-form" id="setupForm">
       <p class="auth-hint">Choose a new password and recovery details so you can reset it later.</p>
       <label>New password<input name="new_password" type="password" minlength="6" autocomplete="new-password" required></label>
-      <label>Date of birth<input name="dob" type="date" required></label>
+      ${dobFieldHtml()}
       <label>Security question<select name="security_question" required>${questionOptions()}</select></label>
       <label>Answer<input name="security_answer" autocomplete="off" required></label>
       <button type="submit" class="auth-submit">Save and continue</button>
@@ -128,11 +185,12 @@ function showFirstSetup() {
     e.preventDefault();
     const fd = new FormData(e.target);
     try {
+      const dob = readDobFromForm(fd);
       await api("/auth/first-setup", {
         method: "POST",
         body: {
           new_password: fd.get("new_password"),
-          dob: fd.get("dob"),
+          dob,
           security_question: fd.get("security_question"),
           security_answer: fd.get("security_answer"),
         },
@@ -295,7 +353,7 @@ function showAccount() {
     </form>
     <form class="auth-form" id="recForm">
       <h3 class="auth-subhead">Recovery details</h3>
-      <label>Date of birth<input name="dob" type="date" required></label>
+      ${dobFieldHtml()}
       <label>Security question<select name="security_question" required>${questionOptions()}</select></label>
       <label>Answer<input name="security_answer" autocomplete="off" required></label>
       <button type="submit" class="auth-submit">Update recovery</button>
@@ -325,10 +383,11 @@ function showAccount() {
     const fd = new FormData(e.target);
     const msg = modalBody.querySelector('[data-msg="rec"]');
     try {
+      const dob = readDobFromForm(fd);
       await api("/account/recovery", {
         method: "POST",
         body: {
-          dob: fd.get("dob"),
+          dob,
           security_question: fd.get("security_question"),
           security_answer: fd.get("security_answer"),
         },
@@ -376,7 +435,7 @@ function showRecoveryReset(username, question) {
       <p class="auth-hint">Verify your identity to set a new password.</p>
       <p class="auth-question">${esc(question)}</p>
       <label>Answer<input name="security_answer" autocomplete="off" required></label>
-      <label>Date of birth<input name="dob" type="date" required></label>
+      ${dobFieldHtml()}
       <label>New password<input name="new_password" type="password" minlength="6" autocomplete="new-password" required></label>
       <button type="submit" class="auth-submit">Reset password</button>
       <p class="auth-msg"></p>
@@ -387,11 +446,12 @@ function showRecoveryReset(username, question) {
     e.preventDefault();
     const fd = new FormData(e.target);
     try {
+      const dob = readDobFromForm(fd);
       await api("/recovery/reset", {
         method: "POST",
         body: {
           username,
-          dob: fd.get("dob"),
+          dob,
           security_answer: fd.get("security_answer"),
           new_password: fd.get("new_password"),
         },

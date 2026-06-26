@@ -1553,6 +1553,16 @@ body.sheet-open {
 }
 .auth-form input:focus,
 .auth-form select:focus { outline: none; border-color: var(--accent); }
+.dob-label .dob-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 0.45rem;
+}
+.dob-label select {
+  min-width: 0;
+  padding-left: 0.55rem;
+  padding-right: 1.6rem;
+}
 .auth-subhead { margin: 0; font-family: var(--font-display); font-size: 1rem; }
 .auth-submit {
   margin-top: 0.25rem;
