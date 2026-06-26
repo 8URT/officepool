@@ -161,6 +161,28 @@ async function loadFixtures() {
 }
 
 function wireFixtureForm() {
+  document.getElementById("importFromApi").addEventListener("click", async () => {
+    const msg = document.querySelector('[data-msg="import"]');
+    const stage = document.getElementById("importStage").value || null;
+    const upcoming_only = document.getElementById("importUpcoming").checked;
+    msg.textContent = "Fetching from API-Football…";
+    msg.className = "auth-msg";
+    try {
+      const result = await api("/admin/ko/import-api", {
+        method: "POST",
+        body: { stage, upcoming_only },
+      });
+      const sample = (result.samples || []).slice(0, 3).join(" · ");
+      msg.textContent = `Imported ${result.total} fixtures (${result.created} new, ${result.updated} updated).${sample ? ` ${sample}` : ""}`;
+      msg.className = "auth-msg ok";
+      toast(`API import: ${result.created} new, ${result.updated} updated`);
+      loadFixtures();
+    } catch (err) {
+      msg.textContent = err.message;
+      msg.className = "auth-msg error";
+    }
+  });
+
   document.getElementById("fixtureForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = e.target;

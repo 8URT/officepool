@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from . import config
 from .db import connect, init_db, log_audit, now_iso
 from .export import is_locked, public_id, write_knockout_json
+from .ko_import import import_ko_fixtures
 from .security import hash_secret, new_token, normalize_answer, verify_secret
 
 app = FastAPI(title="Office Pool Knockout API", docs_url=None, redoc_url=None)
@@ -172,6 +173,11 @@ class AdminMatchIn(BaseModel):
 class AdminPublishIn(BaseModel):
     stage: str
     published: bool = True
+
+
+class AdminImportKoIn(BaseModel):
+    stage: Optional[str] = None
+    upcoming_only: bool = True
 
 
 # --------------------------------------------------------------------------- #
@@ -600,6 +606,22 @@ def admin_ko_publish(body: AdminPublishIn, admin=Depends(require_admin)):
     except Exception as error:  # noqa: BLE001
         print(f"knockout export after publish failed: {error}")
     return {"ok": True}
+
+
+@app.post("/admin/ko/import-api")
+def admin_ko_import_api(body: AdminImportKoIn, admin=Depends(require_admin)):
+    if body.stage and body.stage not in {"R32", "R16", "QF", "SF", "THIRD", "FINAL"}:
+        raise HTTPException(status_code=400, detail="Invalid stage")
+    try:
+        return import_ko_fixtures(
+            stage=body.stage,
+            upcoming_only=body.upcoming_only,
+            actor=admin["username"],
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except Exception as error:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=f"API import failed: {error}") from error
 
 
 @app.get("/admin/audit")

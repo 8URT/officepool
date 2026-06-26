@@ -68,14 +68,15 @@ def is_locked(kickoff_utc: str | None, now: datetime | None = None) -> bool:
     return now >= kickoff - timedelta(minutes=config.CUTOFF_MINUTES)
 
 
-def fetch_api_results() -> dict:
-    """Return {match_key: parsed fixture} for all WC fixtures the API knows about."""
+def fetch_api_results() -> tuple[dict[int, dict], dict[str, dict]]:
+    """Return API live/finished fixtures indexed by fixture id and match key."""
     sync = _sync_module()
     sync.load_dotenv()
     api_key = os.environ.get("API_FOOTBALL_KEY", "").strip()
-    results: dict = {}
+    by_id: dict[int, dict] = {}
+    by_key: dict[str, dict] = {}
     if not api_key:
-        return results
+        return by_id, by_key
     headers = {"x-apisports-key": api_key}
     urls = [
         f"{sync.API_FOOTBALL_BASE}/fixtures?league={sync.WC_LEAGUE_ID}&season={sync.WC_SEASON}",
@@ -89,35 +90,46 @@ def fetch_api_results() -> dict:
             continue
         for fixture in payload.get("response") or []:
             entry = sync.parse_api_fixture(fixture)
-            if entry:
-                results[entry["key"]] = entry
-    return results
+            if not entry:
+                continue
+            fixture_id = entry.get("apiFixtureId")
+            if fixture_id:
+                by_id[int(fixture_id)] = entry
+            by_key[entry["key"]] = entry
+    return by_id, by_key
 
 
 def update_ko_results(conn) -> int:
     """Update ko_matches scores/status from API-Football. Returns rows touched."""
-    results = fetch_api_results()
-    if not results:
+    by_id, by_key = fetch_api_results()
+    if not by_id and not by_key:
         return 0
     touched = 0
     rows = conn.execute("SELECT * FROM ko_matches").fetchall()
     for row in rows:
-        key = match_key(row["home"], row["away"])
-        entry = results.get(key)
+        entry = None
+        if row["api_fixture_id"]:
+            entry = by_id.get(int(row["api_fixture_id"]))
+        if not entry:
+            entry = by_key.get(match_key(row["home"], row["away"]))
         if not entry:
             continue
         is_live = 1 if entry.get("isLive") else 0
         status = entry.get("status") or row["status"]
         score_home = entry.get("scoreHome")
         score_away = entry.get("scoreAway")
+        home = entry.get("home") or row["home"]
+        away = entry.get("away") or row["away"]
         conn.execute(
             """
             UPDATE ko_matches
-               SET status = ?, score_home = ?, score_away = ?, is_live = ?,
-                   minute = ?, source = ?, updated_at = ?
+               SET home = ?, away = ?, status = ?, score_home = ?, score_away = ?,
+                   is_live = ?, minute = ?, source = ?, updated_at = ?
              WHERE id = ?
             """,
             (
+                home,
+                away,
                 status,
                 score_home,
                 score_away,

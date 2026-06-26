@@ -47,6 +47,25 @@
 
       <section class="panel" id="tab-fixtures" hidden>
         <div class="panel-head"><h2>Knockout fixtures</h2></div>
+        <div class="auth-form" style="margin-bottom:1rem;">
+          <p class="auth-hint">Pull upcoming knockout fixtures from API-Football. Unknown teams are imported as placeholders (e.g. Winner Group A, TBD).</p>
+          <div class="admin-import-row">
+            <label>Stage filter
+              <select id="importStage">
+                <option value="">All knockout stages</option>
+                <option value="R32">Round of 32</option>
+                <option value="R16">Round of 16</option>
+                <option value="QF">Quarter-finals</option>
+                <option value="SF">Semi-finals</option>
+                <option value="THIRD">Third place</option>
+                <option value="FINAL">Final</option>
+              </select>
+            </label>
+            <label class="auth-check admin-import-check"><input id="importUpcoming" type="checkbox" checked> Upcoming only</label>
+            <button type="button" class="auth-submit admin-import-btn" id="importFromApi">Pull from API</button>
+          </div>
+          <p class="auth-msg" data-msg="import"></p>
+        </div>
         <form class="auth-form" id="fixtureForm" style="margin-bottom:1rem;">
           <input type="hidden" name="id">
           <label>Stage
@@ -72,6 +91,7 @@
           <button type="button" class="auth-nav-tab" data-publish="R16">R16</button>
           <button type="button" class="auth-nav-tab" data-publish="QF">QF</button>
           <button type="button" class="auth-nav-tab" data-publish="SF">SF</button>
+          <button type="button" class="auth-nav-tab" data-publish="THIRD">3rd</button>
           <button type="button" class="auth-nav-tab" data-publish="FINAL">Final</button>
         </div>
         <div id="fixturesList"><p class="auth-hint">Loading…</p></div>

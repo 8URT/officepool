@@ -225,6 +225,7 @@ def parse_api_fixture(fixture: dict) -> dict | None:
             return None
         return {
             "key": key,
+            "apiFixtureId": fixture_info.get("id"),
             "home": home,
             "away": away,
             "scoreHome": score_home,
@@ -247,6 +248,7 @@ def parse_api_fixture(fixture: dict) -> dict | None:
         status_text = f"{elapsed}'" if elapsed is not None else "Live"
         return {
             "key": key,
+            "apiFixtureId": fixture_info.get("id"),
             "home": home,
             "away": away,
             "scoreHome": score_home,

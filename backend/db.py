@@ -82,10 +82,21 @@ def connect() -> sqlite3.Connection:
     return conn
 
 
+def _migrate(conn: sqlite3.Connection) -> None:
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(ko_matches)")}
+    if "api_fixture_id" not in cols:
+        conn.execute("ALTER TABLE ko_matches ADD COLUMN api_fixture_id INTEGER")
+        conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_ko_api_fixture "
+            "ON ko_matches(api_fixture_id) WHERE api_fixture_id IS NOT NULL"
+        )
+
+
 def init_db() -> None:
     conn = connect()
     try:
         conn.executescript(SCHEMA)
+        _migrate(conn)
         conn.commit()
     finally:
         conn.close()
