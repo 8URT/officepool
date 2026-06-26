@@ -23,7 +23,19 @@ if [[ -x "$VENV/bin/python" ]]; then
 
   if systemctl list-unit-files 2>/dev/null | grep -q "${API_SERVICE}.service"; then
     echo "==> Restarting ${API_SERVICE}"
-    systemctl restart "$API_SERVICE" || true
+    systemctl restart "$API_SERVICE"
+    sleep 1
+    if ! systemctl is-active --quiet "$API_SERVICE"; then
+      echo "ERROR: ${API_SERVICE} failed to start. Check: journalctl -u ${API_SERVICE} -n 30"
+      exit 1
+    fi
+    import_code="$(curl -s -o /dev/null -w '%{http_code}' -X POST "http://127.0.0.1:8001/admin/ko/import-api" \
+      -H "Content-Type: application/json" -d '{"upcoming_only":true}')"
+    if [[ "$import_code" == "404" ]]; then
+      echo "ERROR: API is missing /admin/ko/import-api — backend/ was not updated. Re-run pull-deploy-droplet.sh"
+      exit 1
+    fi
+    echo "    API restarted (import-api HTTP ${import_code})"
   fi
 else
   echo "==> Skipping backend steps (no venv at $VENV; run setup-droplet.sh first)"

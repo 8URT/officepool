@@ -178,7 +178,10 @@ function wireFixtureForm() {
       toast(`API import: ${result.created} new, ${result.updated} updated`);
       loadFixtures();
     } catch (err) {
-      msg.textContent = err.message;
+      msg.textContent =
+        err.status === 404
+          ? "Import API not found — the backend needs a restart after deploy. On the droplet run: cd /opt/officepool && bash scripts/pull-deploy-droplet.sh"
+          : err.message;
       msg.className = "auth-msg error";
     }
   });

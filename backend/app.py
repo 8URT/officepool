@@ -190,7 +190,11 @@ def health():
 
 @app.get("/meta")
 def meta():
-    return {"securityQuestions": config.SECURITY_QUESTIONS, "cutoffMinutes": config.CUTOFF_MINUTES}
+    return {
+        "securityQuestions": config.SECURITY_QUESTIONS,
+        "cutoffMinutes": config.CUTOFF_MINUTES,
+        "features": ["ko-import-api"],
+    }
 
 
 # --------------------------------------------------------------------------- #
